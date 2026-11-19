@@ -1,0 +1,6 @@
+order_id,customer_id,order_date,promised_date,order_status,delay_business_days,order_summary
+SO-48213,CUST-1001,2026-11-02,2026-11-13,Delayed,5,"Store fixtures, 12 pallets"
+SO-48214,CUST-1002,2026-11-09,2026-11-20,In transit,0,"Seasonal toy assortment, 4 pallets"
+SO-48215,CUST-1003,2026-11-03,2026-11-10,Delivered,0,"Bicycle spare parts, 2 pallets"
+SO-48216,CUST-1001,2026-11-16,2026-11-27,Open,0,"Checkout counters, 6 pallets"
+SO-48217,CUST-1004,2026-11-05,2026-11-17,Delayed,2,"Kitchenware, 8 pallets"

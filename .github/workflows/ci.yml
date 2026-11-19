@@ -65,6 +65,8 @@ jobs:
         run: python -B -m unittest discover -s .github/skills/runtime-integration/tests
       - name: Fabric notebook tests (offline binder and seeder)
         run: python -B -m unittest discover -s .github/skills/fabric-workspace/tests
+      - name: Scenario checks (contract, fixtures, rules, ontology, documents and evaluation cases)
+        run: python -B -m unittest discover -s scenario/evals
 
   app:
     name: App

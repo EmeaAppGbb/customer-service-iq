@@ -1,0 +1,28 @@
+/// A customer account with its contracted service tier.
+entity Customer
+	lineageTag: afcda3b7-f7b9-44ce-86ee-8c3eb1aecd23
+	backingTable: demo_customers
+	keyProperty: CustomerId
+
+	/// Stable customer account ID, never reused.
+	property CustomerId
+		dataType: string
+		lineageTag: 6f7d2a62-0cd9-414f-bef5-bae924328ddd
+		backingConfiguration
+			valueColumn: demo_customers.customer_id
+
+	/// Registered trading name of the customer.
+	property CustomerName
+		dataType: string
+		lineageTag: 98e84af1-c8d8-495d-be71-afebc38abcf5
+		backingConfiguration
+			valueColumn: demo_customers.customer_name
+
+	/// Contracted service level: Gold, Silver or Standard.
+	property ServiceTier
+		dataType: string
+		lineageTag: ee4b5372-8b2c-4f72-aa35-f344ecfc8a8f
+		backingConfiguration
+			valueColumn: demo_customers.service_tier
+
+	annotation BootstrapBinding = customer-order-shipment-v1

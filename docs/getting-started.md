@@ -274,9 +274,9 @@ If plan attachment is unavailable, it stops for explicit
 `--bootstrap-fallback notebooks` approval before importing and running the
 notebooks separately.
 
-The seeder creates `dbo.demo_sites` (two rows), `dbo.demo_assets` (three rows), and `Files/documents/starter.txt`, which the default `documents` knowledge folder indexes. It resolves `Scenario` in the **current workspace**, uses GUID-based OneLake paths, and requires no default lakehouse attachment. Reruns only insert missing demo keys and create the file if absent; they do not overwrite edits, delete other data or touch a legacy `Files/starter.txt`. Run one seeder per workspace at a time. It refuses workspace names other than `*-dev` / `*-test` unless `allow_other_workspaces` is explicitly enabled.
+The seeder creates `dbo.demo_customers` (four rows), `dbo.demo_orders` (five rows) and `dbo.demo_shipments` (four rows), and publishes the four [approved service documents](../scenario/knowledge/README.md) into `Files/documents`, which the default `documents` knowledge folder indexes. It resolves `Scenario` in the **current workspace**, uses GUID-based OneLake paths, and requires no default lakehouse attachment. Reruns only insert missing demo keys and missing documents, reading each published document back; they never overwrite an edit or delete other data, and a published document that differs from the reviewed version stops the run before anything is written. Run one seeder per workspace at a time. It refuses workspace names other than `*-dev` / `*-test` unless `allow_other_workspaces` is explicitly enabled.
 
-Run `BindScenario` as an **authorized Fabric user**: service-principal NotebookUtils tokens have restricted scopes. It refreshes the two tables' SQL metadata and binds the Site/Asset ontology to this workspace's lakehouse through its SQL analytics endpoint, with every `ONT_*` source pin; Fabric keeps the pins only in that form, and graph materialization needs them ([binding](ontology-knowledge.md#bind-through-the-sql-analytics-endpoint)). The runner then checks the binding and records the **physical lakehouse and ontology GUIDs**, not the logical IDs in `.platform`. Review the generated DEV binding before promotion. By hand, copy the GUIDs the binder prints and confirm the files/tables and a data-backed ontology query in Fabric before continuing.
+Run `BindScenario` as an **authorized Fabric user**: service-principal NotebookUtils tokens have restricted scopes. It refreshes the three tables' SQL metadata and binds the Customer/SalesOrder/Shipment ontology to this workspace's lakehouse through its SQL analytics endpoint, with every `ONT_*` source pin; Fabric keeps the pins only in that form, and graph materialization needs them ([binding](ontology-knowledge.md#bind-through-the-sql-analytics-endpoint)). The runner then checks the binding and records the **physical lakehouse and ontology GUIDs**, not the logical IDs in `.platform`. Review the generated DEV binding before promotion. By hand, copy the GUIDs the binder prints and confirm the files/tables and a data-backed ontology query in Fabric before continuing.
 
 | Case | Flag |
 | --- | --- |
@@ -393,7 +393,7 @@ knowledge_lakehouse_id = "<dev-Scenario-lakehouse-guid>"
 knowledge_ontologies = {
   scenario = {
     ontology_id = "<dev-ScenarioOntology-guid>"
-    description = "Current sites, assets, their status, and which site each asset belongs to."
+    description = "Current customers, sales orders and shipments: each order's status, promised date and business days late, its customer's service tier, and its shipment's status, location and expected delivery date."
   }
 }
 ```
@@ -428,7 +428,7 @@ Allow time for permission propagation; resolve any ingestion errors before relyi
 The `verify` phase then proves **DEV ready** with your own Search token, never a managed identity:
 
 - Every folder source, attached or not, has ingested its folder.
-- Live ontology retrieval through the check-only knowledge base returns `fabricOntology` activity and references for DEV's workspace and ontology, with **Pump B** and **North Works** in the live source data (or your `--expect` facts). An answer from a document does not count.
+- Live ontology retrieval through the check-only knowledge base returns `fabricOntology` activity and references for DEV's workspace and ontology, with **SHP-7781** and **SO-48213** in the live source data (or your `--expect` facts). An answer from a document does not count.
 - Document retrieval from the agents' knowledge base cites the `documents` source. That base runs at minimal effort, so `verify` sends the question as a search intent.
 - One public-only Web IQ search and one public-context retrieval succeed.
 - With Work IQ, the `WorkIQAgent.Ask` grant and the `work-iq` connection exist; no Work IQ call is made.
@@ -446,8 +446,8 @@ explains the identity flow, access model and evidence.
 
 | Variant | Agent name | Definition | Tools |
 | --- | --- | --- | --- |
-| Scenario assistant – with IQ | `<project>-with-iq` | [`agents/scenario-with-iq/`](../agents/scenario-with-iq/) | Fabric IQ ontology, as the user; Foundry IQ knowledge and Web IQ public context, as the project; Work IQ mail, as the user, only with `work_iq_enabled` |
-| Scenario assistant – without IQ | `<project>-without-iq` | [`agents/scenario-without-iq/`](../agents/scenario-without-iq/) | None |
+| Customer service assistant – with IQ | `<project>-with-iq` | [`agents/scenario-with-iq/`](../agents/scenario-with-iq/) | Fabric IQ ontology, as the user; Foundry IQ knowledge and Web IQ public context, as the project; Work IQ mail, as the user, only with `work_iq_enabled` |
+| Customer service assistant – without IQ | `<project>-without-iq` | [`agents/scenario-without-iq/`](../agents/scenario-without-iq/) | None |
 
 Both share a byte-identical `agent.json` (the model deployment and reasoning
 effort) and `instructions.md`; only their tools differ, so the app can compare an
@@ -490,14 +490,16 @@ your work account:
 
 1. At first sign-in, consent to the app's access to Microsoft Foundry for you,
    unless an administrator granted it for everyone.
-2. Ask **With IQ**: "Which assets are in maintenance, and at which site?" Expect
-   **Pump B at North Works** from the live ontology, cited `[D1]`. The first Fabric
-   IQ call shows a consent card with Microsoft's link: accept, then ask again.
+2. Ask **With IQ**: "Why is order SO-48213 late, and when will it arrive?" Expect
+   a **customs hold on shipment SHP-7781, expected on 20 November 2026**, from the
+   live ontology, cited `[D1]`. The first Fabric IQ call shows a consent card with
+   Microsoft's link: accept, then ask again.
    Fabric IQ and, with Work IQ, Work IQ each ask once per user; Foundry IQ and Web
    IQ use the project's identity and never ask.
 3. Select **Ask both** to compare the answer with IQ against the one without, and
    ask a follow-up to continue the same conversation. A live answer can take a
-   minute; the server waits at most 225 seconds.
+   minute; the server waits at most 225 seconds. The [demo guide](demo/README.md)
+   runs the rest of the scenario.
 
 This proves the route for your account only. Other users need an operator to grant
 them a Foundry role and Fabric access from the

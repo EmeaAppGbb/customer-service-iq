@@ -1,0 +1,56 @@
+/// A customer's sales order with its promised date, status and delay.
+entity SalesOrder
+	lineageTag: 3732876f-bff2-4846-bb59-caca8e6fbaac
+	backingTable: demo_orders
+	keyProperty: OrderId
+
+	/// Sales order number, as quoted to the customer.
+	property OrderId
+		dataType: string
+		lineageTag: 30da3de7-a8c5-438f-962f-a2fb9bccb20a
+		backingConfiguration
+			valueColumn: demo_orders.order_id
+
+	/// The customer account that placed the order.
+	property OrderCustomerId
+		dataType: string
+		lineageTag: 93452675-27eb-4520-88ca-f88bf038eb0f
+		backingConfiguration
+			valueColumn: demo_orders.customer_id
+
+	/// Date the order was confirmed.
+	property OrderDate
+		dataType: dateTime
+		lineageTag: 9b73d506-2119-4d40-83d6-9ac561b3ba95
+		backingConfiguration
+			valueColumn: demo_orders.order_date
+
+	/// Delivery date promised at order confirmation.
+	property PromisedDate
+		dataType: dateTime
+		lineageTag: 719dc33e-68bf-47d3-ac5c-0f3a4e3de473
+		backingConfiguration
+			valueColumn: demo_orders.promised_date
+
+	/// Open, In transit, Delayed or Delivered.
+	property OrderStatus
+		dataType: string
+		lineageTag: d32d27e7-e2c4-4d00-8d65-3ec9983a3124
+		backingConfiguration
+			valueColumn: demo_orders.order_status
+
+	/// Business days late against the promised date; 0 when on time.
+	property DelayBusinessDays
+		dataType: int64
+		lineageTag: fc859da9-1fda-47c3-8c1d-c0e25bf56ba0
+		backingConfiguration
+			valueColumn: demo_orders.delay_business_days
+
+	/// Short description of the goods.
+	property OrderSummary
+		dataType: string
+		lineageTag: 7d60b229-5c96-4c5b-aa23-e033c0c940a1
+		backingConfiguration
+			valueColumn: demo_orders.order_summary
+
+	annotation BootstrapBinding = customer-order-shipment-v1

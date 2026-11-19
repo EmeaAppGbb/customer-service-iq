@@ -74,7 +74,7 @@ work_iq_enabled = false
 # knowledge_ontologies = {
 #   scenario = {
 #     ontology_id = "<dev-ScenarioOntology-physical-guid>"
-#     description = "Current sites, assets, their status, and which site each asset belongs to."
+#     description = "Current customers, sales orders and shipments: each order's status, promised date and business days late, its customer's service tier, and its shipment's status, location and expected delivery date."
 #   }
 # }
 # Ontology queries require delegated user authentication at runtime, not a saved token.
@@ -88,7 +88,7 @@ work_iq_enabled = false
 # default map in infra/variables.tf, so copy it all. A detached folder is created and indexed,
 # ready for a live attach in the Foundry portal; re-applying the knowledge plan detaches it again:
 # knowledge_folders = {
-#   documents = { description = "Starter documents", target_path = "documents", attach = true }
+#   documents = { description = "Approved service documents", target_path = "documents", attach = true }
 #   manuals   = { description = "Equipment manuals", target_path = "manuals", attach = false }
 # }
 # Optional: Entra object IDs that get Search Service Contributor for that live attach:

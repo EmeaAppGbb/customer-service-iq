@@ -66,7 +66,7 @@ who acts on each item and how long it can take.
 - [ ] Commit any change under `agents/` or `app/`; the runner publishes the agent definitions in the checkout and builds only committed app files.
 - [ ] Approve the agent publication (`agent-publish`) when requested.
 - [ ] Approve the image build (`app-build`) and the saved app plan (`--approve app=<sha12>`) when requested. The runner grants the app's Foundry sign-in scope as you; with `--manual-grants`, have an administrator grant it at the reported link, or let each user consent at first sign-in.
-- [ ] Open the web app URL, sign in and ask the sample question **With IQ**; accept the Fabric IQ consent card once, ask again and confirm **Pump B at North Works**. Select **Ask both** to compare the answer without IQ.
+- [ ] Open the web app URL, sign in and ask **Why is order SO-48213 late, and when will it arrive?** **With IQ**; accept the Fabric IQ consent card once, ask again and confirm a **customs hold on shipment SHP-7781, expected on 20 November 2026**. Select **Ask both** to compare the answer without IQ. The [demo guide](docs/demo/README.md#prepare) lists the rest of the demo's preparation.
 - [ ] For each additional user, assign a Foundry role on the project and read access to the required DEV Fabric items; have them sign in and repeat the check. Until a second user has, isolation is not demonstrated.
 - [ ] Retain and securely back up the deployment state.
 
@@ -88,7 +88,7 @@ Only with `work_iq_enabled = true`; see [Work IQ](docs/getting-started.md#work-i
 
 - [ ] Have a Global administrator enable the tenant for the Work IQ API once: `az ad sp create --id fdcc1f02-fc51-4226-8753-f668596af7f7`.
 - [ ] Have a billing administrator set up a Copilot Credits spending policy that covers the **Work IQ API** and every user; it is required even for users with a Microsoft 365 Copilot license.
-- [ ] Give every user a Microsoft 365 mailbox, and put any sample mail into it at least a day before you rely on it.
+- [ ] Give every user a Microsoft 365 mailbox, and put any sample mail, such as the scenario's [two demo messages](scenario/data/work-context-mail.md), into it at least a day before you rely on it.
 - [ ] Arrange administrator consent to the Work IQ registration's `WorkIQAgent.Ask` and `offline_access`: the runner grants `WorkIQAgent.Ask` as you; `offline_access` needs an administrator at the `work_iq` output's `api_permissions_url` or each user's consent.
 - [ ] Set `work_iq_enabled = true` and rerun the runner through the agent phase; turning it off again needs the same rerun.
 - [ ] Have each user consent once, through the link the app shows on their first Work IQ question. Without a tenant that meets these items, Work IQ stays unverified.

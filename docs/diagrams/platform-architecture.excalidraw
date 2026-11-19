@@ -33,7 +33,7 @@
       "locked": true,
       "customData": {
         "title": "Fabric + Foundry IQ",
-        "description": "Intended derived-project architecture, not deployment evidence. GitHub and Copilot author the project; Terraform owns infrastructure. Fabric DEV holds a Scenario lakehouse and bound Site/Asset ontology, while TEST begins empty. OneLake files are indexed into Azure AI Search, whose Foundry IQ knowledge bases hold the documents and the public context that Web IQ supplies. Two Foundry prompt agents share one model and one set of instructions: the with-IQ agent reads documents and public context through Foundry IQ, live facts through native Fabric IQ as the signed-in user and, when Work IQ is enabled, the user's own mail as that user; the without-IQ agent has no tools. The deployment runner publishes the agents to the Foundry project by digest, and Terraform owns the web app's registry, environment, sign-in registration and container app. The Azure Container Apps web app calls only the two configured agents, with the user's own token. Foundry supplies the project and models. Deployment and runtime authorization are separate.",
+        "description": "Intended derived-project architecture, not deployment evidence. GitHub and Copilot author the project; Terraform owns infrastructure. Fabric DEV holds a Scenario lakehouse and bound Customer/Order/Shipment ontology, while TEST begins empty. OneLake files are indexed into Azure AI Search, whose Foundry IQ knowledge bases hold the documents and the public context that Web IQ supplies. Two Foundry prompt agents share one model and one set of instructions: the with-IQ agent reads documents and public context through Foundry IQ, live facts through native Fabric IQ as the signed-in user and, when Work IQ is enabled, the user's own mail as that user; the without-IQ agent has no tools. The deployment runner publishes the agents to the Foundry project by digest, and Terraform owns the web app's registry, environment, sign-in registration and container app. The Azure Container Apps web app calls only the two configured agents, with the user's own token. Foundry supplies the project and models. Deployment and runtime authorization are separate.",
         "role": "page"
       },
       "index": "a0"
@@ -1417,7 +1417,7 @@
       "type": "text",
       "x": 84,
       "y": 791,
-      "width": 192.6123046875,
+      "width": 241.092,
       "height": 22.5,
       "angle": 0,
       "strokeColor": "#000000",
@@ -1442,8 +1442,8 @@
       "locked": false,
       "fontSize": 18,
       "fontFamily": 2,
-      "text": "Site + Asset / LocatedAt",
-      "originalText": "Site + Asset / LocatedAt",
+      "text": "Customer + Order + Shipment",
+      "originalText": "Customer + Order + Shipment",
       "textAlign": "left",
       "verticalAlign": "top",
       "containerId": null,

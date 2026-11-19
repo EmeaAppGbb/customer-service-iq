@@ -3,10 +3,10 @@
   "metadata": {
     "type": "Ontology",
     "displayName": "ScenarioOntology",
-    "description": "Sites, assets and their location relationship. BindScenario connects this definition to the current workspace's seeded Scenario lakehouse."
+    "description": "Customers, sales orders and shipments, and how they relate. BindScenario connects this definition to the current workspace's seeded Scenario lakehouse."
   },
   "config": {
     "version": "2.0",
-    "logicalId": "e6a99499-e3f5-4a9b-8288-3985c73a05e5"
+    "logicalId": "1f717f9e-f11e-48fe-bc82-76908da57f0e"
   }
 }

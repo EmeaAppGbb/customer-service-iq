@@ -3,10 +3,10 @@
   "metadata": {
     "type": "Notebook",
     "displayName": "SeedScenario",
-    "description": "Insert-only synthetic sites/assets and starter knowledge in the current workspace's Scenario lakehouse."
+    "description": "Insert-only synthetic customers, sales orders and shipments and the reviewed service documents in the current workspace's Scenario lakehouse."
   },
   "config": {
     "version": "2.0",
-    "logicalId": "b51938f9-c50b-4e93-b769-7e03b02eda7b"
+    "logicalId": "a9da0221-e1a7-4be0-89e3-2769c77cb28b"
   }
 }

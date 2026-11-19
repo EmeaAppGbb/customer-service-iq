@@ -39,7 +39,7 @@ Confirm the generated file is ignored with `git check-ignore infra/terraform.tfv
 Do **not** regenerate UUIDs or replace every occurrence of `Scenario`:
 
 - `.platform` logical IDs and deployment-plan references identify the same items across environments; keep them synchronized and stable.
-- TMDL lineage tags, `ScenarioLakehouse`, `site-asset-v1`, and the binder's sample logical ID form the sample binding contract.
+- TMDL lineage tags, `ScenarioLakehouse`, `customer-order-shipment-v1`, and the binder's ontology logical ID form the scenario's binding contract.
 - `Scenario` / `ScenarioOntology` are workspace-local display names, not the template's project name. Keep the defaults unless the user requests a coordinated model rename; use the `fabric-workspace` skill for that change.
 - The template tables have no partitions or physical bindings. `SeedScenario` and `BindScenario` resolve the current workspace/lakehouse/ontology and SQL metadata **at runtime in Fabric**, without a saved default lakehouse attachment.
 

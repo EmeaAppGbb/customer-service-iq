@@ -1,0 +1,5 @@
+shipment_id,order_id,carrier,shipment_status,status_detail,current_location,last_update,carrier_eta,eta_freshness
+SHP-7779,SO-48215,Consolidated Messenger,Delivered,Delivered and signed for,Customer site,2026-11-10,2026-11-10,Current
+SHP-7781,SO-48213,Consolidated Messenger,Customs hold,Held for a customs documentation check,Eastport import hub,2026-11-18,2026-11-20,Current
+SHP-7782,SO-48214,Consolidated Messenger,In transit,On schedule,Central distribution hub,2026-11-18,2026-11-20,Current
+SHP-7784,SO-48217,Consolidated Messenger,Delayed,Rerouted after a carrier capacity shortage,Northgate depot,2026-11-16,2026-11-19,Stale

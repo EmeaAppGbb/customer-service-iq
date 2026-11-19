@@ -32,15 +32,15 @@ The [deterministic runner](development.md#deploy-deterministically) executes the
 The [`Bootstrap` deployment plan](../workspace/Bootstrap.DeploymentPlan/plan.yml) orders four groups:
 
 1. Deploy the `Scenario` lakehouse.
-2. Deploy and execute `SeedScenario` to insert missing demo rows and create `Files/documents/starter.txt` if absent.
-3. Deploy `ScenarioOntology` with Site/Asset entities and their relationship.
+2. Deploy and execute `SeedScenario` to insert missing demo customers, orders and shipments, and publish the approved service documents into `Files/documents` where they are missing.
+3. Deploy `ScenarioOntology` with its Customer, SalesOrder and Shipment entities and their relationships.
 4. Deploy and execute `BindScenario` to refresh scoped SQL metadata, bind to the target lakehouse through its SQL analytics endpoint, and expose the physical IDs needed for knowledge setup.
 
 The plan itself is the fifth selected Git item. **A Git push does not run the plan**; attach it to each operation that needs its actions. Existing demo rows and files are preserved. The [Fabric lifecycle diagram](diagrams/fabric-lifecycle.svg) expands the four groups and promotion boundaries. For API request shapes, failure handling and target rebinding, use the [native bootstrap and promotion guide](../cicd/README.md).
 
 ## Where this flow stops
 
-A successful Terraform apply, notebook run, source registration or agent publication is not proof of query readiness. For the sample flow, verify both documents and live ontology data; an answer copied from `starter.txt` is not evidence of live ontology retrieval.
+A successful Terraform apply, notebook run, source registration or agent publication is not proof of query readiness. For the sample flow, verify both documents and live ontology data; an answer copied from a document is not evidence of live ontology retrieval.
 
 The guided flow leaves TEST empty. It does not create PROD, grant other users access to the agents and app, or verify a second user's isolation. Those are separate, explicit tasks. See [runtime integration](runtime-integration.md) and [promotion to TEST and PROD](../cicd/README.md#promoting-through-test-and-prod).
 

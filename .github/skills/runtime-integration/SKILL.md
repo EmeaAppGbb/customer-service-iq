@@ -76,13 +76,16 @@ a question. For the remaining gates in `docs/runtime-integration.md`:
 
 - **Browser sign-in.** The user signs in at the `app` output's URL, asks the sample
   question with IQ, accepts the Fabric IQ consent card once, asks again and gets
-  Pump B at North Works with a `[D1]` marker; then compares with **Ask both** and
+  a customs hold on shipment SHP-7781, expected on 20 November 2026, with a `[D1]`
+  marker; then compares with **Ask both** and
   asks a follow-up. The runner's CLI token does not prove the app's registration,
   its consent or the redirect bridge.
 - **Sources.** Decide from the tool timeline, not answer text: the Fabric IQ call
-  must return live rows as the user, the Foundry IQ call a cited starter-document
-  passage, the Web IQ query public terms only and, with Work IQ, the mail `fetch`
-  the user's own mail. Never accept a `starter.txt` fact as live ontology evidence.
+  must return live rows as the user, the Foundry IQ call a cited passage from an
+  approved document, the Web IQ query public terms only and, with Work IQ, the mail `fetch`
+  the user's own mail. Never accept a document's fact as live ontology evidence. The scenario's
+  [evaluation cases](../../../scenario/evals/README.md) say what each answer must
+  contain.
 - **End-user authorization.** With an explicitly approved second account, confirm
   that a user without a Foundry role receives HTTP 403, and that a user with the
   role but without Fabric access gets an explicit failure or unavailable-source

@@ -1,5 +1,11 @@
-relationship AssetSite
+relationship OrderCustomer
 	fromCardinality: many
 	toCardinality: one
-	fromColumn: demo_assets.site_id
-	toColumn: demo_sites.site_id
+	fromColumn: demo_orders.customer_id
+	toColumn: demo_customers.customer_id
+
+relationship ShipmentOrder
+	fromCardinality: many
+	toCardinality: one
+	fromColumn: demo_shipments.order_id
+	toColumn: demo_orders.order_id

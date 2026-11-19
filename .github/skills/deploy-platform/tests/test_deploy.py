@@ -936,18 +936,18 @@ class BootstrapTests(unittest.TestCase):
 class ScenarioContractTests(unittest.TestCase):
     """The names other owners rely on: the workspace items, the knowledge registration and the agents."""
 
-    def test_the_scenario_is_the_template_sample(self):
+    def test_the_scenario_is_the_delayed_order_sample(self):
         self.assertEqual(deploy.SCENARIO.items, (("lakehouse", "Lakehouse", "Scenario"), ("seed", "Notebook", "SeedScenario"),
                                                  ("ontology", "Ontology", "ScenarioOntology"),
                                                  ("bind", "Notebook", "BindScenario")))
         self.assertEqual((deploy.SCENARIO.plan, deploy.SCENARIO.registration, deploy.SCENARIO.expression),
                          ("Bootstrap", "scenario", "ScenarioLakehouse"))
-        self.assertEqual(deploy.SCENARIO.tables, ("demo_sites", "demo_assets"))
+        self.assertEqual(deploy.SCENARIO.tables, ("demo_customers", "demo_orders", "demo_shipments"))
         self.assertEqual([(step.item, step.parameters, step.skip_completed) for step in deploy.SCENARIO.runs], [
             ("seed", {"lakehouse_name": "Scenario", "allow_other_workspaces": False}, True),
             ("bind", {"lakehouse_name": "Scenario", "ontology_name": "ScenarioOntology"}, False)])
         self.assertEqual(deploy.run_order(), "SeedScenario and BindScenario")
-        self.assertEqual(deploy.SCENARIO.expected_facts, ("Pump B", "North Works"))
+        self.assertEqual(deploy.SCENARIO.expected_facts, ("SHP-7781", "SO-48213"))
         # The default knowledge_folders key, which SeedScenario's Files/documents folder fills.
         self.assertEqual(deploy.SCENARIO.document_source, "documents")
 
@@ -958,17 +958,18 @@ class ScenarioContractTests(unittest.TestCase):
             self.assertIn(step.item, notebooks)
             self.assertEqual(step.parameters["lakehouse_name"], lakehouse)
             self.assertEqual(step.parameters.get("ontology_name", ontology), ontology)
-        # One single-entity question, with the Status value quoted, about rows only the live ontology holds.
-        self.assertTrue(deploy.SCENARIO.ontology_question.startswith(f"Using the live {ontology}, which Asset rows"))
-        self.assertIn('Status value "Maintenance"', deploy.SCENARIO.ontology_question)
+        # One single-entity question, with the status value quoted, about rows only the live ontology holds.
+        self.assertTrue(deploy.SCENARIO.ontology_question.startswith(f"Using the live {ontology}, which Shipment rows"))
+        self.assertIn('ShipmentStatus value "Customs hold"', deploy.SCENARIO.ontology_question)
         self.assertEqual(deploy.knowledge.registration_name(deploy.SCENARIO.registration), deploy.SCENARIO.registration)
         self.assertEqual(deploy.knowledge.description_text(deploy.SCENARIO.registration_description),
                          deploy.SCENARIO.registration_description)
-        self.assertIn("indexed starter document", deploy.SCENARIO.document_question)
-        # The billable public-context question names no site, asset or other private detail.
+        self.assertIn("indexed delayed order handling policy", deploy.SCENARIO.document_question)
+        # The billable public-context question names no customer, order, shipment or other private detail.
         question = deploy.SCENARIO.public_context_question
-        self.assertIn("pump", question.lower())
-        for private in (*deploy.SCENARIO.expected_facts, "Pump A", "demo-", lakehouse, ontology):
+        self.assertIn("customs", question.lower())
+        for private in (*deploy.SCENARIO.expected_facts, "Fabrikam", "Consolidated Messenger", "Eastport", "SO-", "SHP-",
+                        "CUST-", "demo-", lakehouse, ontology):
             self.assertNotIn(private, question)
         for fact in deploy.SCENARIO.expected_facts:
             self.assertIn(fact, deploy.SCENARIO.app_question)
@@ -1409,7 +1410,7 @@ class ReadinessTests(unittest.TestCase):
     def test_public_context_evidence_needs_a_cited_web_iq_call(self):
         cited = {"activity": [{"type": "mcpServer", "knowledgeSourceName": "demo-web",
                                "mcpServerArguments": {"toolName": "web"}}],
-                 "references": [{"type": "mcpServer", "toolName": "web", "sourceData": {"title": "Pump care"}}]}
+                 "references": [{"type": "mcpServer", "toolName": "web", "sourceData": {"title": "Customs clearance basics"}}]}
         self.assertEqual(deploy.public_context_evidence(cited, "demo-web"), ([], {"activity": 1, "references": 1}))
         failed = {"activity": [{"type": "mcpServer", "knowledgeSourceName": "demo-web", "error": "401"}], "references": []}
         self.assertEqual(deploy.public_context_evidence(failed, "demo-web")[0],

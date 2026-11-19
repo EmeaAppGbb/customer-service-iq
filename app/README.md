@@ -1,9 +1,10 @@
-# Scenario assistant app
+# Customer service assistant app
 
-A one-page React app and its Node.js server, deployed as one container on Azure Container Apps. The browser signs
-the user in with MSAL (PKCE) and asks one of the two Foundry prompt agents, **with IQ** or **without IQ**, or both
-side by side. The server verifies the user's Foundry token, then calls the configured project's Responses API as that
-user and streams each tool call and the answer back. It holds no secret and stores no answer.
+The [delayed-order scenario](../docs/demo/README.md)'s web app: a one-page React app and its Node.js server, deployed
+as one container on Azure Container Apps. The browser signs the user in with MSAL (PKCE) and asks one of the two
+Foundry prompt agents, **with IQ** or **without IQ**, or both side by side. The server verifies the user's Foundry
+token, then calls the configured project's Responses API as that user and streams each tool call and the answer back.
+It holds no secret and stores no answer.
 
 ## Layout
 
@@ -22,7 +23,7 @@ From `app/`:
 
 | Command | Runs |
 | --- | --- |
-| `npm run dev:mock` | The page at `http://localhost:3000/` with canned answers for the sample questions: no sign-in, no Azure |
+| `npm run dev:mock` | The page at `http://localhost:3000/` with canned answers for the sample questions and the demo's refusal follow-up: no sign-in, no Azure |
 | `npm run dev` | The real server with Vite's middleware at `http://localhost:3000/`, against the deployment `.env.local` names |
 | `npm run build` | Type checks, then builds the page into `dist/` and bundles the server into one module, `dist-server/main.mjs` |
 | `npm start` | The built server on port 8080 |

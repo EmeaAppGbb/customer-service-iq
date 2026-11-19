@@ -319,6 +319,25 @@ button:disabled {
   letter-spacing: -0.01em;
 }
 
+.case-brief {
+  max-width: 85ch;
+  margin: 0 0 12px;
+  color: var(--ink-2);
+  font-size: 0.9375rem;
+}
+
+.case-tag {
+  margin-right: 4px;
+  padding: 1px 8px;
+  border-radius: 999px;
+  background: var(--surface-2);
+  color: var(--ink-2);
+  font-size: 0.75rem;
+  font-weight: 650;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+}
+
 textarea,
 input[type='text'] {
   width: 100%;

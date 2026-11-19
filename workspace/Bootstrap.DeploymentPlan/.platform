@@ -3,10 +3,10 @@
   "metadata": {
     "type": "DeploymentPlan",
     "displayName": "Bootstrap",
-    "description": "Seed synthetic data in DEV/TEST, deploy the Site/Asset ontology and bind it to the current workspace."
+    "description": "Seed synthetic orders and the reviewed service documents in DEV/TEST, deploy the Customer/SalesOrder/Shipment ontology and bind it to the current workspace."
   },
   "config": {
     "version": "2.0",
-    "logicalId": "17fca947-7a9f-4822-91ac-cd6aa8256e75"
+    "logicalId": "f2017a95-a765-4023-9d97-b75ef582f158"
   }
 }

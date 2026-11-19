@@ -158,7 +158,8 @@ class Scenario(NamedTuple):
     # Asked of the agents' knowledge base, retrieving from the indexed OneLake folder source document_source names.
     document_question: str
     document_source: str
-    # Asked once of the public-context knowledge base: public terms only, never a site, asset or other private detail.
+    # Asked once of the public-context knowledge base: public terms only, never a customer, order, shipment or other
+    # private detail.
     public_context_question: str
     expected_facts: tuple
     app_question: str
@@ -169,23 +170,27 @@ SCENARIO = Scenario(
            ("ontology", "Ontology", "ScenarioOntology"), ("bind", "Notebook", "BindScenario")),
     plan="Bootstrap",
     registration="scenario",
-    registration_description="Current sites, assets, their status, and which site each asset belongs to.",
-    tables=("demo_sites", "demo_assets"),
+    registration_description=("Current customers, sales orders and shipments: each order's status, promised date and "
+                              "business days late, its customer's service tier, and its shipment's status, location "
+                              "and expected delivery date."),
+    tables=("demo_customers", "demo_orders", "demo_shipments"),
     expression="ScenarioLakehouse",
     runs=(NotebookRun("seed", {"lakehouse_name": "Scenario", "allow_other_workspaces": False}, True),
           NotebookRun("bind", {"lakehouse_name": "Scenario", "ontology_name": "ScenarioOntology"}, False)),
     # The value is quoted: unquoted, Fabric sometimes read a bare value as an empty one and found nothing.
-    ontology_question=("Using the live ScenarioOntology, which Asset rows have the Status value \"Maintenance\", and "
-                       "at which site is each asset located? Return asset names and site names."),
-    document_question=("According to the indexed starter document, what does Git store, what does SeedScenario "
-                       "materialize, and which source should be used for current entity values? Answer from the "
-                       "OneLake document and cite it."),
+    ontology_question=("Using the live ScenarioOntology, which Shipment rows have the ShipmentStatus value "
+                       "\"Customs hold\", and which sales order does each shipment deliver? Return shipment IDs and "
+                       "order IDs."),
+    document_question=("According to the indexed delayed order handling policy, what may an analyst offer a Gold "
+                       "customer whose order is three or more business days late, and who must approve a service "
+                       "credit? Answer from the OneLake document and cite it."),
     document_source="documents",
-    public_context_question=("What does manufacturer and industry guidance recommend for the routine preventive "
-                             "maintenance of industrial centrifugal pumps?"),
-    # Seeded rows: the live ontology source must return them in its own source data, not only the starter document.
-    expected_facts=("Pump B", "North Works"),
-    app_question='Ask "Which assets are in maintenance, and at which site?" with IQ and expect Pump B at North Works.',
+    public_context_question=("What commonly causes import customs holds on freight shipments, and how long does "
+                             "clearance usually take after corrected documents are filed?"),
+    # Seeded rows: the live ontology source must return them in its own source data, not only a document.
+    expected_facts=("SHP-7781", "SO-48213"),
+    app_question=('Ask "Why is order SO-48213 late, and when will it arrive?" with IQ and expect a customs hold on '
+                  'shipment SHP-7781, expected on 20 November 2026.'),
 )
 # Item types whose reviewed definitions --update-definitions may write over a live item; data items never.
 UPDATABLE_TYPES = ("Notebook", "Ontology", "DeploymentPlan")

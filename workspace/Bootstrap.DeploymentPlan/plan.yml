@@ -2,34 +2,34 @@ $schema: https://developer.microsoft.com/json-schemas/fabric/item/deploymentPlan
 version: 1.0.0
 groups:
   - name: Scenario
-    logicalId: 094b6f1f-2619-41ad-b7c8-79cc62f71bf1
+    logicalId: ba9d0884-ce52-4c05-97d0-d3365078b2a3
   - name: SeedScenario
-    logicalId: b51938f9-c50b-4e93-b769-7e03b02eda7b
+    logicalId: a9da0221-e1a7-4be0-89e3-2769c77cb28b
     dependsOn:
       - groupName: Scenario
     postActions:
       - name: Seed demo data
         job:
           type: Execute
-          logicalId: b51938f9-c50b-4e93-b769-7e03b02eda7b
+          logicalId: a9da0221-e1a7-4be0-89e3-2769c77cb28b
           parameters:
             - name: lakehouse_name
               value: Scenario
             - name: allow_other_workspaces
               value: false
   - name: ScenarioOntology
-    logicalId: e6a99499-e3f5-4a9b-8288-3985c73a05e5
+    logicalId: 1f717f9e-f11e-48fe-bc82-76908da57f0e
     dependsOn:
       - groupName: SeedScenario
   - name: BindScenario
-    logicalId: 52c47324-b4ec-4504-b6af-62fbf6ead50f
+    logicalId: 09388d0e-8a96-46ce-b95e-bdac7186cc60
     dependsOn:
       - groupName: ScenarioOntology
     postActions:
       - name: Bind seeded ontology
         job:
           type: Execute
-          logicalId: 52c47324-b4ec-4504-b6af-62fbf6ead50f
+          logicalId: 09388d0e-8a96-46ce-b95e-bdac7186cc60
           parameters:
             - name: lakehouse_name
               value: Scenario

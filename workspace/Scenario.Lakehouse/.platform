@@ -3,10 +3,10 @@
   "metadata": {
     "type": "Lakehouse",
     "displayName": "Scenario",
-    "description": "Synthetic scenario tables and starter documents. Data is populated by SeedScenario, not Git."
+    "description": "Synthetic customer, sales order and shipment tables and the reviewed service documents. Data is populated by SeedScenario, not Git."
   },
   "config": {
     "version": "2.0",
-    "logicalId": "094b6f1f-2619-41ad-b7c8-79cc62f71bf1"
+    "logicalId": "ba9d0884-ce52-4c05-97d0-d3365078b2a3"
   }
 }

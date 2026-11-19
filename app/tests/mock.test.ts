@@ -4,10 +4,10 @@ import path from 'node:path'
 import test from 'node:test'
 import { fileURLToPath } from 'node:url'
 import { build } from 'vite'
-import type { ToolCall } from '../src/live/protocol.ts'
+import { iqOf, type ToolCall } from '../src/live/protocol.ts'
 import { parseReply } from '../src/live/reply.ts'
 import { CANCELLED, type TurnLog } from '../src/live/turn.ts'
-import { MOCK_ANSWERS, MOCK_CONSENT_URL, MOCK_SESSION, createMockClient } from '../src/mock/client.ts'
+import { MOCK_ANSWERS, MOCK_CONSENT_URL, MOCK_FOLLOW_UPS, MOCK_REFUSAL, MOCK_SESSION, createMockClient } from '../src/mock/client.ts'
 import { SAMPLES } from '../src/samples.ts'
 
 const app = fileURLToPath(new URL('../', import.meta.url))
@@ -43,7 +43,7 @@ test('mock mode answers every sample question for both agents with its canned re
 
 test('other questions get a canned pointer to the samples, and a mock turn can be stopped', async () => {
   const client = createMockClient({ delayMs: 0 })
-  const other = await client.ask({ variant: 'with_iq', text: 'How many sites are there?' })
+  const other = await client.ask({ variant: 'with_iq', text: 'How many customers are there?' })
   assert.match(other.status === 'answered' ? other.raw : '', /canned answers for the sample questions only/)
   const controller = new AbortController()
   const pending = createMockClient({ delayMs: 5_000 }).ask({ variant: 'with_iq', text: SAMPLES[0].question }, controller.signal)
@@ -51,6 +51,86 @@ test('other questions get a canned pointer to the samples, and a mock turn can b
   const stopped = await pending
   assert.equal(stopped.status === 'failed' && stopped.code, CANCELLED)
   assert.ok(stopped.elapsedMs < 5_000)
+})
+
+test('a follow-up that asks the agent to act gets the refusal from both agents, without a tool', async () => {
+  const client = createMockClient({ delayMs: 0 })
+  const [question] = Object.keys(MOCK_FOLLOW_UPS)
+  for (const variant of ['with_iq', 'without_iq'] as const) {
+    const result = await client.ask({ variant, text: `  ${question.toUpperCase()}  `, previousResponseId: 'resp_mock_1' })
+    assert.equal(result.status === 'answered' && result.raw, MOCK_REFUSAL, variant)
+    assert.deepEqual(result.toolCalls, [])
+  }
+})
+
+interface Expectation {
+  tools?: string[]
+  tools_when_work_iq?: string[]
+  tools_never?: string[]
+  markers_when_work_iq?: string[]
+  facts?: string[]
+  phrases?: string[]
+  markers?: string[]
+  sources?: string[]
+  draft_must_not?: string[]
+  answer_must_not?: string[]
+  tool_arguments_must_not?: Record<string, string>
+  exact_reply?: string
+}
+
+interface EvalCase {
+  id: string
+  question: string
+  sample: boolean
+  follow_up_to?: string
+  with_iq?: Expectation
+  without_iq?: Expectation
+}
+
+test('the canned answers meet the scenario\'s evaluation cases, so mock mode shows what a passing answer looks like', () => {
+  const evals = JSON.parse(readFileSync(new URL('../../scenario/evals/cases.json', import.meta.url), 'utf8')) as {
+    private_terms: string[]
+    refusal: string
+    cases: EvalCase[]
+  }
+  assert.equal(MOCK_REFUSAL, evals.refusal)
+  const prefix: Readonly<Record<string, string>> = { fabric: 'D', foundry: 'F', web: 'Web', work: 'W' }
+  for (const evalCase of evals.cases) {
+    if (evalCase.follow_up_to && Object.hasOwn(MOCK_FOLLOW_UPS, evalCase.question)) {
+      for (const variant of ['with_iq', 'without_iq'] as const) {
+        assert.equal(MOCK_FOLLOW_UPS[evalCase.question][variant].answer, evals.refusal, evalCase.id)
+      }
+    }
+    if (!evalCase.sample) continue
+    for (const variant of ['with_iq', 'without_iq'] as const) {
+      const expect = evalCase[variant]
+      if (!expect) continue
+      const canned = MOCK_ANSWERS[evalCase.question][variant]
+      const label = `${evalCase.id} ${variant}`
+      const answer = canned.answer.toLowerCase()
+      const reply = parseReply(canned.answer)
+      const servers = canned.tools.map((tool) => tool.server)
+      for (const server of [...(expect.tools ?? []), ...(expect.tools_when_work_iq ?? [])]) assert.ok(servers.includes(server), `${label} calls ${server}`)
+      for (const server of expect.tools_never ?? []) assert.ok(!servers.includes(server), `${label} never calls ${server}`)
+      for (const text of [...(expect.facts ?? []), ...(expect.phrases ?? [])]) assert.ok(answer.includes(text.toLowerCase()), `${label} says ${text}`)
+      for (const text of expect.answer_must_not ?? []) assert.ok(!answer.includes(text.toLowerCase()), `${label} never says ${text}`)
+      // Every required marker appears, and no marker cites a tool the turn didn't call.
+      const kinds = new Set(reply.markers.map((marker) => prefix[marker.kind]))
+      const called = new Set(servers.map((server) => prefix[iqOf(server) ?? '']))
+      for (const kind of [...(expect.markers ?? []), ...(expect.markers_when_work_iq ?? [])]) assert.ok(kinds.has(kind), `${label} cites ${kind}`)
+      for (const kind of kinds) assert.ok(called.has(kind), `${label} cites ${kind} only after calling its tool`)
+      for (const source of expect.sources ?? []) assert.ok(reply.sources.some((line) => line.text.includes(source)), `${label} cites ${source}`)
+      if (expect.draft_must_not) {
+        const draft = canned.answer.split('\n').filter((line) => line.startsWith('> ')).join('\n').toLowerCase()
+        assert.ok(draft, `${label} drafts a reply`)
+        for (const text of expect.draft_must_not) assert.ok(!draft.includes(text.toLowerCase()), `${label} keeps ${text} out of the draft`)
+      }
+      for (const server of Object.keys(expect.tool_arguments_must_not ?? {})) {
+        const calls = canned.tools.filter((tool) => tool.server === server)
+        for (const term of evals.private_terms) assert.ok(calls.every((tool) => !tool.arguments.includes(term)), `${label}: ${server} never sends ${term}`)
+      }
+    }
+  }
 })
 
 test('mock mode needs no sign-in and labels itself', () => {

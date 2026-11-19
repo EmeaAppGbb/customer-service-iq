@@ -1,7 +1,15 @@
-/// An asset is located at a site.
-entityRelationship LocatedAt
-	lineageTag: 8d834f6c-0e07-421a-9f89-03c25b88aae1
-	fromEntity: Asset
-	toEntity: Site
+/// A sales order is placed by one customer.
+entityRelationship PlacedBy
+	lineageTag: a7362212-d553-46de-8890-283d754680c5
+	fromEntity: SalesOrder
+	toEntity: Customer
 	backingConfiguration
-		relationship: AssetSite
+		relationship: OrderCustomer
+
+/// A shipment delivers one sales order.
+entityRelationship Delivers
+	lineageTag: 0b028e72-2f34-4603-8eed-b9cd42254ce4
+	fromEntity: Shipment
+	toEntity: SalesOrder
+	backingConfiguration
+		relationship: ShipmentOrder

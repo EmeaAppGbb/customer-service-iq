@@ -29,8 +29,9 @@ WITH_IQ = REPO / foundry.VARIANTS["with_iq"]
 # Any source marker, such as [D1], [F1 §2] or [Web1].
 MARKER = re.compile(r"\[([A-Za-z]+)\d+(?:\s*§\s*[\w.-]+)?\]")
 # The sample's facts reach an agent only through its tools: the without-IQ variant shares the instructions.
-SAMPLE_FACTS = ("Pump", "Conveyor", "North Works", "South Works", "demo-site", "demo-asset", "Operational",
-                "Maintenance", "starter.txt")
+SAMPLE_FACTS = ("Fabrikam", "Tailspin", "Adventure Works", "Wide World", "SO-482", "SHP-77", "CUST-10",
+                "Consolidated Messenger", "Eastport", "Northgate", "Gold", "CS-POL", "CS-GDL", "LOG-KB", "DATA-DEF",
+                "20 November 2026", "store opening")
 
 
 class FoundryAgentTests(unittest.TestCase):
@@ -73,7 +74,7 @@ class FoundryAgentTests(unittest.TestCase):
     def test_the_mail_tool_reads_one_search_of_the_users_mail(self):
         # Work IQ's server also offers tools that act: the tool allows only fetch, of one fixed search.
         mail = json.loads((WITH_IQ / "tools" / "WorkIQMail.json").read_text(encoding="utf-8"))
-        self.assertIn('exactly this one path for the asset\'s name: /me/messages?$search="<asset name>"'
+        self.assertIn('exactly this one path for the order number: /me/messages?$search="<order number>"'
                       "&$select=subject,from,receivedDateTime,webLink,body&$top=10 ", mail["server_description"])
         self.assertIn("never ask it to send, reply, schedule or change anything", mail["server_description"])
 

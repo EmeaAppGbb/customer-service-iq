@@ -216,7 +216,7 @@ variable "knowledge_folders" {
   }))
   default = {
     documents = {
-      description = "Starter documents"
+      description = "Approved service documents"
       target_path = "documents"
       attach      = true
     }

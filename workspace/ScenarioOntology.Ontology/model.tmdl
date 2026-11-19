@@ -1,9 +1,11 @@
 model Model
 
-ref table demo_sites
-ref table demo_assets
+ref table demo_customers
+ref table demo_orders
+ref table demo_shipments
 
-ref entity Site
-ref entity Asset
+ref entity Customer
+ref entity SalesOrder
+ref entity Shipment
 
 ref namespace default

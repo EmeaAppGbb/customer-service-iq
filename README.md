@@ -10,13 +10,21 @@ A starter for independent **Fabric + Foundry IQ** projects: Terraform infrastruc
 Fabric bootstrap uses native APIs by default: **no GitHub PAT required**.
 Set `fabric_git_enabled = true` to opt into Fabric GitHub synchronization.
 
+## This project: the delayed customer order
+
+A customer-service analyst at Contoso, a fictional distributor, investigates why a customer's order is late and
+prepares a reply. The with-IQ agent combines live order data (**Fabric IQ**), approved service documents
+(**Foundry IQ**), the analyst's own mail (**Work IQ**) and public context (**Web IQ**) into a cited
+recommendation and a draft that a person reviews and sends; the same agent without IQ shows what it can't
+confirm. Start with the [demo guide](docs/demo/README.md); the scenario's sources live in [`scenario/`](scenario/).
+
 ## What gets created
 
 - **Azure:** resource group, Fabric capacity, container registry, Log Analytics and Application Insights (Entra ID only, no ingestion key), and a Container Apps environment with the web app.
 - **Identity/access:** Entra deployment app/service principal, delegated scopes, authorized clients, the web app's single-page sign-in registration, the Work IQ registration only with Work IQ, managed identities and role assignments.
 - **Fabric:** DEV/TEST workspaces and DEV-to-TEST deployment pipeline; GitHub credentials connection only with Git synchronization enabled.
 - **DEV items:** `Scenario` lakehouse, `ScenarioOntology`, `SeedScenario`, `BindScenario` and `Bootstrap` deployment plan.
-- **Seed data:** `dbo.demo_sites` (2 rows), `dbo.demo_assets` (3 rows) and `Files/documents/starter.txt`.
+- **Seed data:** `dbo.demo_customers` (4 rows), `dbo.demo_orders` (5 rows), `dbo.demo_shipments` (4 rows) and four approved service documents in `Files/documents`.
 - **Foundry:** account, project, `agent`/`chat`/`embedding` model deployments, and Search, knowledge-base, public-context, Fabric IQ, Application Insights and, only with Work IQ, Work IQ connections.
 - **Search:** service, one indexed OneLake source per knowledge folder with its generated ingestion assets, the agents' knowledge base, a check-only knowledge base with the live ontology source, and the Web IQ public-context source and knowledge base.
 - **Web IQ:** global G3 account; portal AppID/key setup is manual.
@@ -32,9 +40,9 @@ Set `fabric_git_enabled = true` to opt into Fabric GitHub synchronization.
 | [`workspace/`](workspace/) | Fabric items: lakehouse, seed and bind notebooks, ontology and bootstrap plan. |
 | [`agents/`](agents/README.md) | The two Foundry prompt agent variants: shared `agent.json` and `instructions.md`, and the with-IQ variant's `tools/`. |
 | [`app/`](app/README.md) | The Container Apps web app: the React page, the Node server that verifies each user's token and asks the agents, and its image. |
-| `scenario/` | Added by your project: data contracts, documents, workflow rules and evaluations ([contract](docs/scenario-authoring.md)). |
+| [`scenario/`](scenario/) | The delayed-order scenario: its data contract and fixtures, approved documents, workflow rules, demo mail and evaluation cases ([contract](docs/scenario-authoring.md)). |
 | [`cicd/`](cicd/README.md) | Native Fabric bootstrap and promotion. |
-| [`docs/`](docs/getting-started.md) | Guides, starting with getting started. |
+| [`docs/`](docs/getting-started.md) | Guides, starting with getting started; the scenario's [demo guide](docs/demo/README.md). |
 | [`.github/skills/`](.github/skills/) | Copilot skills that run each workflow. |
 
 The devcontainer includes the [official Azure/Foundry IQ, Work IQ/M365 Agents

@@ -1,0 +1,127 @@
+{
+  "contract": "customer-service-orders",
+  "version": "1.0.0",
+  "fictional": true,
+  "scenario_date": "2026-11-19",
+  "lakehouse": "Scenario",
+  "schema": "dbo",
+  "ontology": "ScenarioOntology",
+  "tables": [
+    {
+      "name": "demo_customers",
+      "grain": "One row per customer account.",
+      "key": "customer_id",
+      "source_system": "CRM customer master",
+      "owner": "Sales Operations",
+      "steward": "Customer master data steward",
+      "refresh": "Nightly",
+      "columns": [
+        {"name": "customer_id", "type": "string", "nullable": false, "pattern": "^CUST-[0-9]{4}$",
+         "description": "Stable customer account ID, never reused."},
+        {"name": "customer_name", "type": "string", "nullable": false,
+         "description": "Registered trading name of the customer."},
+        {"name": "service_tier", "type": "string", "nullable": false, "allowed": ["Gold", "Silver", "Standard"],
+         "description": "Contracted service level; the delayed order handling policy sets remedies by tier."}
+      ]
+    },
+    {
+      "name": "demo_orders",
+      "grain": "One row per customer order.",
+      "key": "order_id",
+      "source_system": "ERP order management, curated with the latest shipment event",
+      "owner": "Order Management",
+      "steward": "Order data steward",
+      "refresh": "Hourly",
+      "columns": [
+        {"name": "order_id", "type": "string", "nullable": false, "pattern": "^SO-[0-9]{5}$",
+         "description": "Sales order number, as quoted to the customer."},
+        {"name": "customer_id", "type": "string", "nullable": false, "references": "demo_customers.customer_id",
+         "description": "The customer account that placed the order."},
+        {"name": "order_date", "type": "date", "nullable": false,
+         "description": "Date the order was confirmed."},
+        {"name": "promised_date", "type": "date", "nullable": false,
+         "description": "Delivery date promised at order confirmation; never changed afterwards."},
+        {"name": "order_status", "type": "string", "nullable": false,
+         "allowed": ["Open", "In transit", "Delayed", "Delivered"],
+         "description": "Derived: Open without a shipment, Delivered once its shipment is delivered, Delayed when delay_business_days is above 0, otherwise In transit."},
+        {"name": "delay_business_days", "type": "int", "nullable": false, "minimum": 0,
+         "description": "Derived: business days (Monday to Friday) after promised_date up to the shipment's carrier_eta; 0 when on time or not shipped. Public holidays are not deducted."},
+        {"name": "order_summary", "type": "string", "nullable": false,
+         "description": "Short description of the goods, safe to quote to the customer."}
+      ]
+    },
+    {
+      "name": "demo_shipments",
+      "grain": "One row per shipment; each shipped order has exactly one shipment.",
+      "key": "shipment_id",
+      "source_system": "Carrier events through the transport management system",
+      "owner": "Logistics Operations",
+      "steward": "Shipment data steward",
+      "refresh": "With each carrier event",
+      "columns": [
+        {"name": "shipment_id", "type": "string", "nullable": false, "pattern": "^SHP-[0-9]{4}$",
+         "description": "Shipment ID assigned at dispatch."},
+        {"name": "order_id", "type": "string", "nullable": false, "references": "demo_orders.order_id",
+         "description": "The order this shipment delivers."},
+        {"name": "carrier", "type": "string", "nullable": false,
+         "description": "Carrier that holds the shipment."},
+        {"name": "shipment_status", "type": "string", "nullable": false,
+         "allowed": ["In transit", "Customs hold", "Delayed", "Delivered"],
+         "description": "Latest carrier status."},
+        {"name": "status_detail", "type": "string", "nullable": false,
+         "description": "The carrier's short explanation of the latest status."},
+        {"name": "current_location", "type": "string", "nullable": false,
+         "description": "Hub, depot or site of the latest carrier event."},
+        {"name": "last_update", "type": "date", "nullable": false,
+         "description": "Date of the latest carrier event; eta_freshness derives from it."},
+        {"name": "carrier_eta", "type": "date", "nullable": false,
+         "description": "The carrier's expected delivery date, or the delivery date once delivered."},
+        {"name": "eta_freshness", "type": "string", "nullable": false, "allowed": ["Current", "Stale"],
+         "description": "Derived: Stale when a shipment that is not delivered has had no carrier event for more than one business day, otherwise Current."}
+      ]
+    }
+  ],
+  "entities": [
+    {
+      "name": "Customer",
+      "table": "demo_customers",
+      "key": "CustomerId",
+      "description": "A customer account with its contracted service tier.",
+      "properties": {"CustomerId": "customer_id", "CustomerName": "customer_name", "ServiceTier": "service_tier"}
+    },
+    {
+      "name": "SalesOrder",
+      "table": "demo_orders",
+      "key": "OrderId",
+      "description": "A customer's sales order with its promised date, status and delay.",
+      "properties": {"OrderId": "order_id", "OrderCustomerId": "customer_id", "OrderDate": "order_date",
+                     "PromisedDate": "promised_date", "OrderStatus": "order_status",
+                     "DelayBusinessDays": "delay_business_days", "OrderSummary": "order_summary"}
+    },
+    {
+      "name": "Shipment",
+      "table": "demo_shipments",
+      "key": "ShipmentId",
+      "description": "The carrier shipment that delivers a sales order, with its latest status and expected delivery date.",
+      "properties": {"ShipmentId": "shipment_id", "ShipmentOrderId": "order_id", "Carrier": "carrier",
+                     "ShipmentStatus": "shipment_status", "StatusDetail": "status_detail",
+                     "CurrentLocation": "current_location", "LastUpdate": "last_update",
+                     "CarrierEta": "carrier_eta", "EtaFreshness": "eta_freshness"}
+    }
+  ],
+  "relationships": [
+    {"name": "OrderCustomer", "entity_relationship": "PlacedBy", "from_entity": "SalesOrder", "to_entity": "Customer",
+     "from_column": "demo_orders.customer_id", "to_column": "demo_customers.customer_id",
+     "from_cardinality": "many", "to_cardinality": "one", "description": "A sales order is placed by one customer."},
+    {"name": "ShipmentOrder", "entity_relationship": "Delivers", "from_entity": "Shipment", "to_entity": "SalesOrder",
+     "from_column": "demo_shipments.order_id", "to_column": "demo_orders.order_id",
+     "from_cardinality": "many", "to_cardinality": "one", "description": "A shipment delivers one sales order."}
+  ],
+  "quality_rules": [
+    {"id": "DQ-01", "rule": "Keys are unique and every reference resolves.", "owner": "Each table's steward"},
+    {"id": "DQ-02", "rule": "delay_business_days equals the business-day rule in scenario/workflows/delay_rules.py.", "owner": "Order data steward"},
+    {"id": "DQ-03", "rule": "order_status follows the derivation rule in scenario/workflows/delay_rules.py.", "owner": "Order data steward"},
+    {"id": "DQ-04", "rule": "Every order that is not Open has exactly one shipment; an Open order has none.", "owner": "Shipment data steward"},
+    {"id": "DQ-05", "rule": "eta_freshness follows the freshness rule in scenario/workflows/delay_rules.py: a stale carrier_eta is confirmed with Logistics before it is given to a customer.", "owner": "Shipment data steward"}
+  ]
+}

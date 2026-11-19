@@ -77,7 +77,7 @@ resource "restful_resource" "public_context_base" {
     description           = "Public-context knowledge base for ${var.project_name}: public web context from Web IQ only, never company data."
     outputMode            = "answerSynthesis"
     answerInstructions    = "Answer only from the retrieved public web passages and cite each page's title and URL. This is public, general context, not company guidance: it never decides a requirement or an outcome. If no passage answers the question, say so."
-    retrievalInstructions = "Use the web tool with contentFormat set to passage. Search only for public, general context, such as manufacturer or industry guidance. Never include a person's name, a site or asset name, or any other private detail in a query."
+    retrievalInstructions = "Use the web tool with contentFormat set to passage. Search only for public, general context, such as how customs clearance or carrier delays usually work. Never include a person's name, a customer, order or shipment, or any other private detail in a query."
     knowledgeSources      = [{ name = restful_resource.public_context_source[count.index].body.name }]
     models = [{
       kind = "azureOpenAI"

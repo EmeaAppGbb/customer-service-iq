@@ -1,7 +1,7 @@
 import { useId, useState, type FormEvent, type KeyboardEvent } from 'react'
 import { CHOICES, CHOICE_HINTS, LEGEND, type Choice } from '../labels.ts'
 import { IQ_NAMES, QUESTION_LIMIT } from '../live/protocol.ts'
-import { SAMPLES } from '../samples.ts'
+import { CASE_BRIEF, SAMPLES } from '../samples.ts'
 
 interface ComposerProps {
   // Why asking is unavailable, such as before sign-in; undefined when the user can ask.
@@ -31,8 +31,9 @@ export function Composer({ blocked, onAsk }: ComposerProps) {
     <section className="composer" aria-labelledby={`${id}-label`}>
       <form onSubmit={submit}>
         <label id={`${id}-label`} htmlFor={`${id}-question`} className="composer-label">
-          Ask about the sample’s sites and assets
+          Ask about a customer’s order
         </label>
+        <p id={`${id}-case`} className="case-brief"><span className="case-tag">Case</span> {CASE_BRIEF}</p>
         <textarea
           id={`${id}-question`}
           value={text}
@@ -40,8 +41,8 @@ export function Composer({ blocked, onAsk }: ComposerProps) {
           onKeyDown={onKeyDown}
           maxLength={QUESTION_LIMIT}
           rows={3}
-          placeholder="Which assets are in maintenance, and at which site?"
-          aria-describedby={`${id}-hint`}
+          placeholder="Why is order SO-48213 late, and when will it arrive?"
+          aria-describedby={`${id}-case ${id}-hint`}
         />
         <div className="composer-bar">
           <fieldset className="segmented">

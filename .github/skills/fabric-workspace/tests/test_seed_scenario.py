@@ -2,35 +2,49 @@
 
 The notebook's cells run with stand-ins for notebookutils, pyspark.sql and delta.tables; nothing calls Fabric or
 Spark. The stand-ins implement only the calls the notebook makes, with the semantics it relies on: errorifexists
-writes, Delta's insert-only merge on the key, and notebookutils.fs files that are never overwritten and need their
-folder to exist.
+writes, Delta's insert-only merge on the key, typed columns, and notebookutils.fs files that are never overwritten,
+need their folder to exist and read back through head().
 """
 
 import copy
+import csv
+from datetime import date
 import re
 import types
 import unittest
 
-from _support import LAKEHOUSE_ID, OTHER_ID, WORKSPACE_ID, run
+from _support import LAKEHOUSE_ID, OTHER_ID, ROOT, WORKSPACE_ID, run
 
 LAKEHOUSE_PATH = f"abfss://{WORKSPACE_ID}@onelake.dfs.fabric.microsoft.com/{LAKEHOUSE_ID}"
 TABLES = f"{LAKEHOUSE_PATH}/Tables/dbo"
 FILES = f"{LAKEHOUSE_PATH}/Files"
 # The default knowledge_folders entry, documents, indexes Files/documents.
-STARTER = f"{FILES}/documents/starter.txt"
-LEGACY = f"{FILES}/starter.txt"
-PUMP_B = ("demo-asset-002", "demo-site-001", "Pump B", "Maintenance")
+DOCUMENTS = f"{FILES}/documents"
+KNOWLEDGE = ROOT / "scenario" / "knowledge"
+FIXTURES = ROOT / "scenario" / "data" / "fixtures"
+REVIEWED = {path.name: path.read_text(encoding="utf-8") for path in sorted(KNOWLEDGE.glob("*.md")) if path.name != "README.md"}
+POLICY = f"{DOCUMENTS}/CS-POL-014-delayed-order-handling-policy.md"
+SO_48213 = ("SO-48213", "CUST-1001", date(2026, 11, 2), date(2026, 11, 13), "Delayed", 5, "Store fixtures, 12 pallets")
+KINDS = {"STRING": ("string", str), "DATE": ("date", date), "INT": ("int", int)}
 
 
 class Schema:
-    """A Spark schema from the notebook's DDL: `name STRING, ...`."""
+    """A Spark schema from the notebook's DDL: `name STRING, name DATE, name INT, ...`."""
 
     def __init__(self, ddl):
-        self.ddl, self.names = ddl, re.findall(r"(\w+) STRING", ddl)
-        assert ", ".join(f"{name} STRING" for name in self.names) == ddl, ddl
+        self.ddl = ddl
+        self.columns = re.findall(r"(\w+) (STRING|DATE|INT)", ddl)
+        assert ", ".join(f"{name} {kind}" for name, kind in self.columns) == ddl, ddl
+        self.names = [name for name, _ in self.columns]
 
     def simpleString(self):
-        return "struct<" + ",".join(f"{name}:string" for name in self.names) + ">"
+        return "struct<" + ",".join(f"{name}:{KINDS[kind][0]}" for name, kind in self.columns) + ">"
+
+    def check(self, row):
+        assert len(row) == len(self.columns), row
+        for value, (name, kind) in zip(row, self.columns):
+            expected = KINDS[kind][1]
+            assert type(value) is expected, f"{name} must be {expected.__name__}, not {value!r}"
 
 
 class Frame:
@@ -124,6 +138,8 @@ class Lake:
 
     def __init__(self):
         self.files, self.directories, self.tables, self.log = {}, set(), {}, []
+        # A put that stores something else, to prove the read-back check.
+        self.corrupt = None
 
     def exists(self, path):
         return path in self.files or path in self.directories or path in self.tables
@@ -137,9 +153,19 @@ class Lake:
         assert path.rsplit("/", 1)[0] in self.directories, f"no folder for {path}"
         if path in self.files and not overwrite:
             raise FileExistsError(path)
-        self.files[path] = content
+        self.files[path] = self.corrupt(content) if self.corrupt else content
         self.log.append(("put", path))
         return True
+
+    def head(self, path, max_bytes):
+        # notebookutils.fs.head returns at most max_bytes bytes, decoded as UTF-8.
+        return self.files[path].encode("utf-8")[:max_bytes].decode("utf-8", errors="replace")
+
+    def ls(self, path):
+        assert path in self.directories, path
+        prefix = path + "/"
+        return [types.SimpleNamespace(name=name[len(prefix):], path=name)
+                for name in sorted(self.files) if name.startswith(prefix) and "/" not in name[len(prefix):]]
 
 
 class Spark:
@@ -149,7 +175,8 @@ class Spark:
     def createDataFrame(self, data, schema):
         schema = Schema(schema)
         rows = [tuple(row) for row in data]
-        assert all(len(row) == len(schema.names) and all(type(value) is str for value in row) for row in rows), rows
+        for row in rows:
+            schema.check(row)
         return Frame(self.lake, schema, rows)
 
 
@@ -182,49 +209,96 @@ def seeded():
     return lake
 
 
+def fixture(name, schema):
+    """A scenario/data fixture's rows, typed as the notebook's schema types them."""
+    convert = {"STRING": str, "DATE": date.fromisoformat, "INT": int}
+    with (FIXTURES / f"{name}.csv").open(encoding="utf-8", newline="") as handle:
+        reader = csv.reader(handle)
+        header = next(reader)
+        assert header == schema.names, (name, header)
+        return [tuple(convert[kind](value) for value, (_, kind) in zip(row, schema.columns)) for row in reader]
+
+
+def writes(lake, start=0):
+    return [entry for entry in lake.log[start:] if entry[0] in ("create", "put", "mkdirs")
+            or (entry[0] == "merge" and entry[3])]
+
+
 class SeedTests(unittest.TestCase):
-    def test_a_first_run_seeds_both_tables_and_the_documents_folder(self):
+    def test_a_first_run_seeds_the_reviewed_rows_and_publishes_the_reviewed_documents(self):
         lake = Lake()
         namespace, output = seed(lake)
-        self.assertEqual(sorted(lake.tables), [f"{TABLES}/demo_assets", f"{TABLES}/demo_sites"])
-        self.assertIn(PUMP_B, lake.tables[f"{TABLES}/demo_assets"]["rows"])
-        self.assertIn(("demo-site-001", "North Works", "North"), lake.tables[f"{TABLES}/demo_sites"]["rows"])
-        self.assertEqual(lake.files, {STARTER: namespace["starter_document"]})
-        self.assertEqual([entry for entry in lake.log if entry[0] in ("mkdirs", "put")],
-                         [("mkdirs", f"{FILES}/documents"), ("put", STARTER)])
-        self.assertIn("Files/documents", namespace["starter_document"], "the document names the folder it is indexed from")
-        self.assertIn("Created Files/documents/starter.txt.", output)
-        self.assertNotIn("Left Files/starter.txt", output)
+        names = ("demo_customers", "demo_orders", "demo_shipments")
+        self.assertEqual(sorted(lake.tables), [f"{TABLES}/{name}" for name in names])
+        for name in names:
+            table = lake.tables[f"{TABLES}/{name}"]
+            self.assertEqual(table["rows"], fixture(name, Schema(table["ddl"])), name)
+        self.assertIn(SO_48213, lake.tables[f"{TABLES}/demo_orders"]["rows"])
+        # The notebook carries scenario/knowledge byte for byte, and publishes nothing else.
+        self.assertEqual(namespace["documents"], REVIEWED)
+        self.assertEqual(lake.files, {f"{DOCUMENTS}/{name}": text for name, text in REVIEWED.items()})
+        self.assertEqual([entry for entry in lake.log if entry[0] == "mkdirs"], [("mkdirs", DOCUMENTS)])
+        for name in REVIEWED:
+            self.assertIn(f"Published Files/documents/{name}.", output)
+        self.assertNotIn("did not publish", output)
 
     def test_a_rerun_inserts_and_writes_nothing(self):
         lake = seeded()
         before, start = copy.deepcopy((lake.files, lake.directories, lake.tables)), len(lake.log)
         _, output = seed(lake)
         self.assertEqual((lake.files, lake.directories, lake.tables), before)
-        self.assertEqual(lake.log[start:], [("merge", f"{TABLES}/demo_sites", ("site_id",), 0),
-                                            ("merge", f"{TABLES}/demo_assets", ("asset_id",), 0)])
-        self.assertIn("Preserving existing Files/documents/starter.txt.", output)
+        self.assertEqual(writes(lake, start), [])
+        self.assertEqual([entry[1:] for entry in lake.log[start:] if entry[0] == "merge"],
+                         [(f"{TABLES}/demo_customers", ("customer_id",), 0), (f"{TABLES}/demo_orders", ("order_id",), 0),
+                          (f"{TABLES}/demo_shipments", ("shipment_id",), 0)])
+        for name in REVIEWED:
+            self.assertIn(f"Files/documents/{name} is already the reviewed version.", output)
 
-    def test_existing_rows_and_an_edited_document_are_kept_and_missing_rows_inserted(self):
+    def test_existing_rows_are_kept_and_missing_rows_and_documents_inserted(self):
         lake = seeded()
-        lake.files[STARTER] = "edited in the lakehouse"
-        assets = lake.tables[f"{TABLES}/demo_assets"]["rows"]
-        assets[:] = [row for row in assets if row[0] != "demo-asset-001"]
-        assets[assets.index(PUMP_B)] = PUMP_B[:3] + ("Operational",)
-        seed(lake)
-        self.assertEqual(lake.files, {STARTER: "edited in the lakehouse"})
-        self.assertIn(("demo-asset-001", "demo-site-001", "Pump A", "Operational"), assets)
-        self.assertIn(PUMP_B[:3] + ("Operational",), assets, "an existing row is never updated")
-        self.assertEqual(len(assets), 3)
+        orders = lake.tables[f"{TABLES}/demo_orders"]["rows"]
+        orders[:] = [row for row in orders if row[0] != "SO-48214"]
+        orders[orders.index(SO_48213)] = SO_48213[:4] + ("In transit", 0) + SO_48213[6:]
+        del lake.files[POLICY]
+        start = len(lake.log)
+        _, output = seed(lake)
+        self.assertIn(("SO-48214", "CUST-1002", date(2026, 11, 9), date(2026, 11, 20), "In transit", 0,
+                       "Seasonal toy assortment, 4 pallets"), orders)
+        self.assertIn(SO_48213[:4] + ("In transit", 0) + SO_48213[6:], orders, "an existing row is never updated")
+        self.assertEqual(len(orders), 5)
+        self.assertEqual(lake.files[POLICY], REVIEWED["CS-POL-014-delayed-order-handling-policy.md"])
+        self.assertEqual([entry for entry in writes(lake, start) if entry[0] == "put"], [("put", POLICY)])
+        self.assertIn("Published Files/documents/CS-POL-014-delayed-order-handling-policy.md.", output)
 
-    def test_a_starter_left_in_the_files_root_is_untouched(self):
+    def test_a_different_published_document_stops_the_run_before_anything_is_written(self):
+        for edit in (lambda text: text.replace("10%", "15%"), lambda text: text + "\nAn unreviewed addition.\n",
+                     lambda text: text[:100]):
+            lake = seeded()
+            lake.files[POLICY] = edit(lake.files[POLICY])
+            del lake.tables[f"{TABLES}/demo_shipments"]
+            before, start = copy.deepcopy((lake.files, lake.tables)), len(lake.log)
+            with self.subTest(edit=edit), self.assertRaisesRegex(
+                    ValueError, "different version of CS-POL-014-delayed-order-handling-policy.md. Nothing was written"):
+                seed(lake)
+            self.assertEqual((lake.files, lake.tables), before, "neither a table nor a document is written")
+            self.assertEqual(lake.log[start:], [])
+
+    def test_a_document_that_does_not_read_back_fails_the_run(self):
         lake = Lake()
-        lake.directories.add(FILES)
-        lake.files[LEGACY] = "an earlier starter document"
-        namespace, output = seed(lake)
-        self.assertEqual(lake.files, {LEGACY: "an earlier starter document", STARTER: namespace["starter_document"]})
-        self.assertNotIn(LEGACY, [entry[1] for entry in lake.log])
-        self.assertIn("Left Files/starter.txt in place", output)
+        lake.corrupt = lambda content: content.replace("Approved", "Draft")
+        with self.assertRaisesRegex(RuntimeError, "did not read back as the reviewed document"):
+            seed(lake)
+
+    def test_other_files_in_the_documents_folder_are_reported_and_left_alone(self):
+        lake = Lake()
+        lake.directories.update({FILES, DOCUMENTS})
+        lake.files[f"{DOCUMENTS}/starter.txt"] = "an earlier sample document"
+        _, output = seed(lake)
+        self.assertEqual(lake.files[f"{DOCUMENTS}/starter.txt"], "an earlier sample document")
+        self.assertNotIn(("put", f"{DOCUMENTS}/starter.txt"), lake.log)
+        self.assertNotIn(("mkdirs", DOCUMENTS), lake.log, "an existing folder is not created again")
+        self.assertIn("Files/documents also holds files this notebook did not publish, which the agents can cite: "
+                      "starter.txt.", output)
 
     def test_nothing_is_written_outside_a_dev_or_test_lakehouse_or_over_an_incompatible_table(self):
         for parameters, context, message in (
@@ -237,18 +311,20 @@ class SeedTests(unittest.TestCase):
                 seed(lake, parameters, **context)
             self.assertEqual(lake.log, [])
         lake = Lake()
-        lake.directories.add(f"{TABLES}/demo_sites")
+        lake.directories.add(f"{TABLES}/demo_customers")
         with self.assertRaisesRegex(ValueError, "Refusing to replace a non-Delta path"):
             seed(lake)
         lake = seeded()
-        lake.tables[f"{TABLES}/demo_sites"]["ddl"] = "site_id STRING, site_name STRING"
+        # A table seeded with text dates, as an earlier schema might have, is never rewritten.
+        orders = lake.tables[f"{TABLES}/demo_orders"]
+        orders["ddl"] = orders["ddl"].replace("promised_date DATE", "promised_date STRING")
         start = len(lake.log)
-        with self.assertRaisesRegex(ValueError, "Existing schema differs from the seed schema: demo_sites"):
+        with self.assertRaisesRegex(ValueError, "Existing schema differs from the seed schema: demo_orders"):
             seed(lake)
-        self.assertEqual(lake.log[start:], [])
+        self.assertEqual(writes(lake, start), [])
         lake = Lake()
         seed(lake, {"allow_other_workspaces": True}, workspace_name="scenario-prod")
-        self.assertIn(STARTER, lake.files)
+        self.assertIn(POLICY, lake.files)
 
 
 if __name__ == "__main__":

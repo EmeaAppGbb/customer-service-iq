@@ -13,9 +13,10 @@
 
 # # Bind the scenario ontology
 # Run after SeedScenario and ScenarioOntology deploy. This notebook does not seed
-# data or create items. It binds only the sample ontology to its current workspace,
-# through the lakehouse's SQL analytics endpoint with ONT_* source pins on every
-# partition: Fabric keeps the pins in this form, and graph materialization needs them.
+# data or create items. It binds only the Customer/SalesOrder/Shipment ontology to
+# its current workspace, through the lakehouse's SQL analytics endpoint with ONT_*
+# source pins on every partition: Fabric keeps the pins in this form, and graph
+# materialization needs them.
 # Run as an authorized Fabric user; service-principal NotebookUtils tokens lack
 # the full Fabric scopes needed for these definition/metadata operations.
 # Serialize runs and authoring: updateDefinition replaces the item's definition.
@@ -56,12 +57,12 @@ workspace_id = str(UUID(notebookutils.runtime.context["currentWorkspaceId"]))
 workspace_name = notebookutils.runtime.context["currentWorkspaceName"]
 deadline = time.monotonic() + timeout_seconds
 api_root = "https://api.fabric.microsoft.com"
-ontology_logical_id = "e6a99499-e3f5-4a9b-8288-3985c73a05e5"
-table_names = ("demo_sites", "demo_assets")
-entity_names = ("Site", "Asset")
-binding_marker = "annotation BootstrapBinding = site-asset-v1"
+ontology_logical_id = "1f717f9e-f11e-48fe-bc82-76908da57f0e"
+table_names = ("demo_customers", "demo_orders", "demo_shipments")
+entity_names = ("Customer", "SalesOrder", "Shipment")
+binding_marker = "annotation BootstrapBinding = customer-order-shipment-v1"
 expression_name = "ScenarioLakehouse"
-source_lineage_tag = "afcdf5a6-abb9-4722-81d6-c540ac4b4433"
+source_lineage_tag = "563c960a-86cf-4627-bc57-8169b025ddeb"
 
 
 def remaining_seconds():

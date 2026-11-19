@@ -39,8 +39,8 @@ Report security issues as described in [SECURITY.md](SECURITY.md), never in a pu
   stable; they are not deployment IDs.
 - **Locked dependencies.** Keep `app/package-lock.json` in step with `app/package.json`, on
   public npm registry URLs ([npm lockfile](#npm-lockfile)); never hand-edit its hashes.
-- **Fictional sample.** Keep sample sites, assets, documents and mail fictional; never add a
-  real customer, company or person name.
+- **Fictional sample.** Keep the sample's company, customers, orders, documents and mail fictional;
+  never add a real customer, company or person name.
 - **Pins.** Do not upgrade providers, tools or dependencies in an unrelated change.
 - **Docs in step.** Keep the README, [getting started](docs/getting-started.md) and
   `infra/terraform.tfvars.example` aligned with any input or behavior change.

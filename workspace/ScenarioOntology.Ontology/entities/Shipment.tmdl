@@ -1,0 +1,70 @@
+/// The carrier shipment that delivers a sales order, with its latest status and expected delivery date.
+entity Shipment
+	lineageTag: e2430238-8d04-4b3d-96fc-898ac8c11cbf
+	backingTable: demo_shipments
+	keyProperty: ShipmentId
+
+	/// Shipment ID assigned at dispatch.
+	property ShipmentId
+		dataType: string
+		lineageTag: 5ef30ca6-333f-447e-81e4-94d5ca8b22ed
+		backingConfiguration
+			valueColumn: demo_shipments.shipment_id
+
+	/// The sales order this shipment delivers.
+	property ShipmentOrderId
+		dataType: string
+		lineageTag: 0b1601de-b297-4e99-b1fd-5d454fa81873
+		backingConfiguration
+			valueColumn: demo_shipments.order_id
+
+	/// Carrier that holds the shipment.
+	property Carrier
+		dataType: string
+		lineageTag: d5049f15-4ed7-4c5f-a32a-554ba01ad0e7
+		backingConfiguration
+			valueColumn: demo_shipments.carrier
+
+	/// In transit, Customs hold, Delayed or Delivered.
+	property ShipmentStatus
+		dataType: string
+		lineageTag: 9aeb9de3-4165-4e30-b0d0-df457f7fb8cb
+		backingConfiguration
+			valueColumn: demo_shipments.shipment_status
+
+	/// The carrier's explanation of the latest status.
+	property StatusDetail
+		dataType: string
+		lineageTag: 6d50ce9d-3e59-4f15-8492-c512a9eb1c39
+		backingConfiguration
+			valueColumn: demo_shipments.status_detail
+
+	/// Hub, depot or site of the latest carrier event.
+	property CurrentLocation
+		dataType: string
+		lineageTag: 64bd50fa-ff18-4b26-aa8d-181b597f5fbd
+		backingConfiguration
+			valueColumn: demo_shipments.current_location
+
+	/// Date of the latest carrier event.
+	property LastUpdate
+		dataType: dateTime
+		lineageTag: d25a401b-7c1b-4748-b3fb-a5599c0bd1ad
+		backingConfiguration
+			valueColumn: demo_shipments.last_update
+
+	/// The carrier's expected delivery date, or the delivery date once delivered.
+	property CarrierEta
+		dataType: dateTime
+		lineageTag: cbae5a86-c214-47cb-bba5-9544a59b424d
+		backingConfiguration
+			valueColumn: demo_shipments.carrier_eta
+
+	/// Current, or Stale when the carrier has sent no event for more than one business day.
+	property EtaFreshness
+		dataType: string
+		lineageTag: 8789452c-22b0-42bd-9e2c-70bfa1c25bbd
+		backingConfiguration
+			valueColumn: demo_shipments.eta_freshness
+
+	annotation BootstrapBinding = customer-order-shipment-v1

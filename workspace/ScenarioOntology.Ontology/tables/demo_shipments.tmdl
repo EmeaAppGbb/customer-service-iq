@@ -1,0 +1,40 @@
+table demo_shipments
+	lineageTag: 3a7643b5-e1d6-49d4-8480-f5b19dbe7f35
+
+	column shipment_id
+		dataType: string
+		sourceColumn: shipment_id
+
+	column order_id
+		dataType: string
+		sourceColumn: order_id
+
+	column carrier
+		dataType: string
+		sourceColumn: carrier
+
+	column shipment_status
+		dataType: string
+		sourceColumn: shipment_status
+
+	column status_detail
+		dataType: string
+		sourceColumn: status_detail
+
+	column current_location
+		dataType: string
+		sourceColumn: current_location
+
+	column last_update
+		dataType: dateTime
+		formatString: General Date
+		sourceColumn: last_update
+
+	column carrier_eta
+		dataType: dateTime
+		formatString: General Date
+		sourceColumn: carrier_eta
+
+	column eta_freshness
+		dataType: string
+		sourceColumn: eta_freshness

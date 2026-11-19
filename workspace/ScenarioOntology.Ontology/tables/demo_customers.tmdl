@@ -1,0 +1,14 @@
+table demo_customers
+	lineageTag: cfd790ba-e316-457a-a4e5-9b0135dc9326
+
+	column customer_id
+		dataType: string
+		sourceColumn: customer_id
+
+	column customer_name
+		dataType: string
+		sourceColumn: customer_name
+
+	column service_tier
+		dataType: string
+		sourceColumn: service_tier

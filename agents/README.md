@@ -1,10 +1,11 @@
-# Scenario assistant (Foundry prompt agents)
+# Customer service assistant (Foundry prompt agents)
 
 > [!IMPORTANT]
-> **Fictional sample.** The sites, assets, documents and mail in this scenario are invented to
-> demonstrate Microsoft IQ. They are not operational guidance.
+> **Fictional sample.** The company, customers, orders, documents and mail in this scenario are invented
+> to demonstrate Microsoft IQ. They are not operational guidance.
 
-One Foundry prompt agent definition in two variants: the same model, the same instructions and the
+The [delayed-order scenario](../docs/demo/README.md)'s assistant helps a customer-service analyst investigate
+a late order and prepare a reply. It is one Foundry prompt agent definition in two variants: the same model, the same instructions and the
 same question, with only the tools changing, so the app can compare an answer with IQ against one
 without. Each tool is an MCP tool limited to its read-only `allowed_tools`, without approval steps.
 The agents run with the signed-in user's token, which the app forwards: Fabric IQ and Work IQ mail
@@ -13,8 +14,8 @@ project.
 
 | Variant | Directory | Runner key | Agent name | Display name | Tools |
 | --- | --- | --- | --- | --- | --- |
-| With IQ | `scenario-with-iq/` | `with_iq` | `<project>-with-iq` | Scenario assistant – with IQ | Fabric IQ ontology, Foundry IQ knowledge, Web IQ public context and, when Work IQ is enabled, Work IQ mail |
-| Without IQ | `scenario-without-iq/` | `without_iq` | `<project>-without-iq` | Scenario assistant – without IQ | None |
+| With IQ | `scenario-with-iq/` | `with_iq` | `<project>-with-iq` | Customer service assistant – with IQ | Fabric IQ ontology, Foundry IQ knowledge, Web IQ public context and, when Work IQ is enabled, Work IQ mail |
+| Without IQ | `scenario-without-iq/` | `without_iq` | `<project>-without-iq` | Customer service assistant – without IQ | None |
 
 Terraform names each variant in its `foundry_agents` output and gives the names to the container
 app as `AGENT_WITH_IQ` and `AGENT_WITHOUT_IQ`.
@@ -26,7 +27,7 @@ app as `AGENT_WITH_IQ` and `AGENT_WITHOUT_IQ`.
 | `agent.json` | All, byte-identical | The agent version's `description` (`{{agent_display_name}}`) and `definition`: `kind: prompt`, the model deployment (`{{agent_model_deployment}}`) and the reasoning effort (`{{agent_reasoning_effort}}`). |
 | `instructions.md` | All, byte-identical | The shared instructions, sent as the definition's `instructions`. |
 | `tools/FabricIQOntology.json` | With IQ | `fabric_iq_ontology`: `ScenarioOntology`'s ontology endpoint, allowing only `ask_ontology`, as the user. |
-| `tools/FoundryIQKnowledge.json` | With IQ | `foundry_iq_knowledge`: the agents' knowledge base of approved documents, such as `starter.txt`, allowing only `knowledge_base_retrieve`, as the project. |
+| `tools/FoundryIQKnowledge.json` | With IQ | `foundry_iq_knowledge`: the agents' knowledge base of the [approved service documents](../scenario/knowledge/README.md), allowing only `knowledge_base_retrieve`, as the project. |
 | `tools/WebIQPublicContext.json` | With IQ | `web_iq_public_context`: the `<project>-public-context` knowledge base, whose only source is Web IQ, allowing only `knowledge_base_retrieve`, as the project. |
 | `tools/WorkIQMail.json` | With IQ, when Work IQ is enabled | `work_iq_mail`: Work IQ's MCP server, allowing only `fetch`, on the `work-iq` connection, as the user. |
 
@@ -50,22 +51,26 @@ The tool descriptions, at most 1,024 characters each, carry what is specific to 
 shared instructions stay generic:
 
 - **Fabric IQ ontology** asks one question about the rows of one entity, with values in quotes, such
-  as which `Asset` rows have a given `Status`, with each asset's site. Its rows are the only current
-  facts.
-- **Foundry IQ knowledge** retrieves passages from the approved documents. The agent takes each
+  as the `SalesOrder` row with a given `OrderId`, with its customer's tier through `PlacedBy` and its
+  shipment through `Delivers`. Its rows are the only current facts; the delay and the expected
+  date's freshness come from the data, never from the agent's own arithmetic.
+- **Foundry IQ knowledge** retrieves passages from the approved documents: the delayed-order policy, the
+  communication guideline, the customs note and the data definitions. The agent takes each
   document's title and section from the passage text, because a result can omit citation markers.
-- **Web IQ public context** is for public, general context only, such as a manufacturer's guidance
-  about a type of equipment. A query never holds a site, asset or person's name, and the agent uses at
-  most one line, labelled "Public context, not company guidance".
+- **Web IQ public context** is for public, general context only, such as how customs holds usually
+  work. A query never holds a customer, order, shipment, carrier, location or person's name, and the
+  agent uses at most one line, labelled "Public context, not company guidance".
 - **Work IQ mail** makes one `fetch` of exactly
-  `/me/messages?$search="<asset name>"&$select=subject,from,receivedDateTime,webLink,body&$top=10`.
+  `/me/messages?$search="<order number>"&$select=subject,from,receivedDateTime,webLink,body&$top=10`.
   Work IQ's server also offers tools that act, so the tool allows only `fetch`.
 
 The instructions open with which tools each kind of question calls, then the rules (cite only
-sources received in the conversation, never fill a gap from memory, read-only), then the reply
-format: a Markdown answer with a marker after each fact (`[D1]` ontology data, `[F1]` or `[F1 §2]` an
+sources received in the conversation, never fill a gap from memory, recommend only what an approved
+document allows and name its approvals, keep internal details out of customer drafts, read-only),
+then the reply format: a Markdown answer with a marker after each fact (`[D1]` ontology data, `[F1]` or `[F1 §2]` an
 approved document, `[Web1]` public context, `[W1]` a mail message), a *Sources* line per marker and
-a numbered *Steps* list of the tools called. The app shows the markers as source chips. Because the
+a numbered *Steps* list of the tools called. A draft in quotes carries no markers: its facts are
+cited in the answer above it. The app shows the markers as source chips. Because the
 without-IQ variant shares the instructions, they hold no document content or sample facts: those
 reach an agent only through its tools. They stay within 8,000 characters and contain no braces.
 

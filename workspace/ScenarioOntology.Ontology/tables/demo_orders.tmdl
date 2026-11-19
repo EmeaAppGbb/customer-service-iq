@@ -1,0 +1,33 @@
+table demo_orders
+	lineageTag: 79630414-6180-4f5d-b258-27a3c2f4df6a
+
+	column order_id
+		dataType: string
+		sourceColumn: order_id
+
+	column customer_id
+		dataType: string
+		sourceColumn: customer_id
+
+	column order_date
+		dataType: dateTime
+		formatString: General Date
+		sourceColumn: order_date
+
+	column promised_date
+		dataType: dateTime
+		formatString: General Date
+		sourceColumn: promised_date
+
+	column order_status
+		dataType: string
+		sourceColumn: order_status
+
+	column delay_business_days
+		dataType: int64
+		formatString: 0
+		sourceColumn: delay_business_days
+
+	column order_summary
+		dataType: string
+		sourceColumn: order_summary

@@ -42,8 +42,10 @@ the repository root.
 
 ## Fabric ontology work package
 
-A different domain gets new item identities, not a rewritten Site/Asset model
-under its old logical ID. Publish all of the following together:
+A different domain gets new item identities, not a rewritten model under its old
+logical ID: this project's Customer/SalesOrder/Shipment ontology replaced the
+template's Site/Asset sample with new logical IDs and lineage tags. Publish all of
+the following together:
 
 ```text
 workspace/
@@ -111,8 +113,10 @@ native sync plus explicit notebook execution path. Never silently omit actions.
 The current [seeder](../workspace/SeedScenario.Notebook/notebook-content.py),
 [binder](../workspace/BindScenario.Notebook/notebook-content.py) and
 [plan](../workspace/Bootstrap.DeploymentPlan/plan.yml) demonstrate the safety
-contract. Their Site/Asset-specific identity/mapping checks are not a generic
-rewriter for another domain.
+contract. Their Customer/SalesOrder/Shipment-specific identity/mapping checks are
+not a generic rewriter for another domain. The [delayed-order scenario](../scenario/data/README.md)
+is this project's complete work package: contract, fixtures, rules, documents,
+evaluation cases and the [demo guide](demo/README.md).
 
 ## Knowledge and indexing work package
 
