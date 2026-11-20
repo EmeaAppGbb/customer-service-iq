@@ -47,7 +47,7 @@ const SOURCES = {
   web: 'Understanding customs holds · example.com · https://example.com/customs-holds',
 }
 
-const [endToEnd, whyLate, delayed, remedies, definitions, publicContext, mail] = SAMPLES.map((sample) => sample.question)
+const [endToEnd, whyLate, delayed, remedies, definitions, publicContext, mail, guidanceAndContext] = SAMPLES.map((sample) => sample.question)
 
 // By sample question, then variant.
 export const MOCK_ANSWERS: Readonly<Record<string, Record<Variant, Canned>>> = {
@@ -234,6 +234,41 @@ export const MOCK_ANSWERS: Readonly<Record<string, Record<Variant, Canned>>> = {
       ].join('\n'),
     },
     without_iq: NO_TOOLS('what your mail says about SO-48213'),
+  },
+  [guidanceAndContext]: {
+    with_iq: {
+      tools: [
+        {
+          server: 'foundry_iq_knowledge', tool: 'knowledge_base_retrieve',
+          arguments: '{"queries":["How a customs hold is handled, who acts, its typical timeline and how to describe it to a customer"]}',
+        },
+        {
+          server: 'web_iq_public_context', tool: 'knowledge_base_retrieve',
+          arguments: '{"queries":["common causes of customs holds and typical customs clearance times"]}',
+        },
+      ],
+      answer: [
+        '**Describe a customs hold to the customer as a routine customs check: the logistics coordinator owns the hold, and the customer hears only the expected delivery date from the live shipment data.** [F1 §2][F1 §3][F1 §5]',
+        '',
+        '- Ask the logistics coordinator for updates; customer service never contacts the carrier or the customs broker directly [F1 §2].',
+        '- After corrected documents are filed, release usually follows within one to two business days and delivery within one further business day. That is internal guidance, not a commitment to the customer [F1 §3].',
+        '- Escalate to the Logistics Operations lead when a hold lasts more than three business days [F1 §4].',
+        '- To the customer: apologise once, say the order is held for a routine customs check, give the expected delivery date as expected rather than guaranteed, and say when they will hear from us next [F2 §2][F2 §3][F2 §5].',
+        '- Never mention tariff or customs codes, document details or the broker [F1 §5][F2 §4].',
+        '',
+        '**Public context, not company guidance:** holds commonly follow incomplete or inconsistent documents, classification or valuation questions and inspections; clearance ranges from a day or two for a routine release to weeks for an intensive exam [Web1].',
+        '',
+        'Sources',
+        '- [F1] Customs holds: internal handling note (LOG-KB-031) · §2 Who acts, §3 Typical timeline, §4 Escalation, §5 Customer wording',
+        '- [F2] Customer communication guideline: delayed orders (CS-GDL-007) · §2 Tone, §3 Structure of a delay reply, §4 What never goes into a customer reply, §5 Plain wording for common causes',
+        `- [Web1] ${SOURCES.web}`,
+        '',
+        'Steps',
+        '1. Foundry IQ knowledge: asked how a customs hold is handled, who acts, its typical timeline and how to describe it to a customer; it returned the customs-hold note and the communication guideline.',
+        '2. Web IQ public context: searched public guidance on the common causes of customs holds and typical clearance times, with no customer, order or carrier detail; it returned one general page.',
+      ].join('\n'),
+    },
+    without_iq: NO_TOOLS('our customs-hold guidance or public context on customs holds'),
   },
 }
 

@@ -221,6 +221,25 @@
         "outcome": "failed",
         "review": "The app shows Foundry's refusal (HTTP 403) naming the Foundry User role; no answer is produced."
       }
+    },
+    {
+      "id": "CS-EXTERNAL-14",
+      "perspective": "analyst",
+      "summary": "Foundry IQ beside Web IQ: approved guidance cited document by document, and public context labelled and kept apart from it.",
+      "question": "How do we handle a customs hold under our internal guidance, and what may we tell the customer? Add public context on common causes and typical clearance times.",
+      "sample": true,
+      "requires": [],
+      "with_iq": {
+        "tools": ["foundry_iq_knowledge", "web_iq_public_context"],
+        "tools_never": ["fabric_iq_ontology", "work_iq_mail"],
+        "facts": ["routine customs check", "business days"],
+        "phrases": ["Public context, not company guidance"],
+        "markers": ["F", "Web"],
+        "sources": ["LOG-KB-031"],
+        "tool_arguments_must_not": {"web_iq_public_context": "private_terms"},
+        "review": "Each document has its own marker; the internal timeline is guidance, never a promise to the customer; one labelled public-context line with the page's title, site and URL, which never overrides the documents."
+      },
+      "without_iq": {"tools": [], "phrases": ["can't confirm"], "markers": [], "answer_must_not": ["routine customs check"]}
     }
   ]
 }

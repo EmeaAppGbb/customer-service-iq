@@ -22,6 +22,7 @@ private term. They cover the three perspectives of the demo:
 | `CS-DQ-09` | Service owner | A stale expected date stops a promise until Logistics confirms it |
 | `CS-GAP-10` | Analyst | A question no approved document covers is answered as such, not from memory |
 | `CS-AUTH-11` to `CS-AUTH-13` | Governance | A user without Fabric access, a second user's isolation, and a user without a Foundry role |
+| `CS-EXTERNAL-14` | Analyst | Foundry IQ beside Web IQ: approved guidance cited document by document, public context labelled and kept apart |
 
 ## Check the cases offline
 

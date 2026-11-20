@@ -132,6 +132,20 @@ the analyst sends, and the credit goes through an approval workflow outside the 
 | *What commonly causes import customs holds, and how long does clearance usually take?* (`CS-PUBLIC-06`) | Web IQ | One labelled line with the page's title, site and URL; check its date; a public-only query |
 | *Find recent mail about SO-48213* (`CS-MAIL-07`) | Work IQ | Only the presenter's own mailbox, after their own consent |
 
+Then select the last sample (`CS-EXTERNAL-14`), which sets internal guidance beside external information:
+
+> How do we handle a customs hold under our internal guidance, and what may we tell the customer? Add public
+> context on common causes and typical clearance times.
+
+- **Foundry IQ** cites each document with its own marker, such as `[F1]` for the customs-hold note and `[F2]` for
+  the communication guideline. Its timeline of one to two business days is internal guidance, never a promise to
+  the customer.
+- **Web IQ** adds one line that begins *Public context, not company guidance*, with the page's title, site and URL.
+  Discuss the source's credibility and currency, and that it never overrides an approved document.
+- **Permitted use:** put *Fabrikam Retail's shipment is held in customs at the Eastport import hub.* in front of the
+  question. The Web IQ query in the tool timeline names neither the customer nor the hub. The agent may then also
+  check the shipment's live status first, which adds about half a minute.
+
 **4. Access and accountability.** Explain, or show with a second user, that every answer runs as the signed-in
 analyst: Fabric IQ returns only rows they may read, Work IQ only their mail, and a user without a Foundry role is
 refused (`CS-AUTH-11` to `CS-AUTH-13`). Nothing falls back to another identity or source.
@@ -194,7 +208,7 @@ live reference for registering, owning, reviewing and retiring an agent.
 | **Analyst:** a useful knowledge-work scenario | Steps 1 and 3 | Live |
 | **Analyst:** business data made understandable, from source through meaning, ownership and quality to a decision | Steps 5 and 6; [scenario data](../../scenario/data/README.md) | Live and in the repository |
 | **Analyst:** access rights carry through; sources identified; decisions and agent activity reviewable | Steps 1, 2, 4 and 7 | Live; second-user cases with a second account |
-| **Analyst:** external information: credibility, currency, permitted use, internal versus external | Steps 1 and 3 (Web IQ) | Live, labelled, public-only queries |
+| **Analyst:** external information: credibility, currency, permitted use, internal versus external | Steps 1 and 3 (Web IQ, then `CS-EXTERNAL-14`) | Live, labelled, public-only queries |
 | Capability selection with the existing Azure AI Landing Zone | [Capability selection](capability-selection.md) | Documented |
 
 ## If something goes wrong on stage

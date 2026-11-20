@@ -1,6 +1,7 @@
 // The delayed-order scenario: a customer-service analyst investigates order SO-48213, which is late, and prepares a
 // reply. The sample questions run from the end-to-end case, which uses all four IQs, to one question per IQ, so
-// "Ask both" shows what each one adds. The scenario is set on Thursday 19 November 2026.
+// "Ask both" shows what each one adds, and end with approved guidance beside public context. The scenario is set on
+// Thursday 19 November 2026.
 export interface Sample {
   question: string
   // Shown next to a sample that needs an IQ a deployment may leave off.
@@ -22,4 +23,5 @@ export const SAMPLES: readonly Sample[] = [
   { question: 'How is an order\'s delay calculated, who owns the carrier\'s expected delivery date, and when is it stale?' },
   { question: 'What commonly causes import customs holds, and how long does clearance usually take?' },
   { question: 'Find recent mail about SO-48213', note: 'needs Work IQ' },
+  { question: 'How do we handle a customs hold under our internal guidance, and what may we tell the customer? Add public context on common causes and typical clearance times.' },
 ]
