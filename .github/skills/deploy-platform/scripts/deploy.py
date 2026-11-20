@@ -1531,11 +1531,13 @@ def check_search_tier(ctx, subscription, values):
     location, sku = values["search_location"] or values["location"], values["search_sku"]
     result = run(ctx, ["az", "rest", "--method", "post", "--url", SEARCH_OFFERINGS, "--only-show-errors", "--output", "json"])
     try:
-        regions = {region.get("regionName"): {offer.get("name") for offer in region.get("skus") or []}
+        regions = {region.get("regionName"): {(offer.get("sku") or {}).get("name")
+                                              for offer in region.get("skus") or []} - {None}
                    for region in json.loads(result.stdout or "{}").get("regions") or []}
     except (ValueError, AttributeError):
         regions = {}
-    if result.code or not regions:
+    # A response that names no SKU anywhere is unreadable, not proof that nothing is offered.
+    if result.code or not any(regions.values()):
         ctx.log(f"Could not read Search offerings; confirm {sku} is offered in {location} before approving the platform plan.")
         note = f"Search {sku} in {location} unverified"
     elif sku not in regions.get(location, ()):

@@ -1525,8 +1525,9 @@ class ReadinessTests(unittest.TestCase):
 
 SEARCH_URL = ("https://management.azure.com/subscriptions/sub/resourceGroups/rg/providers/Microsoft.Search"
               "/searchServices/srch-demo?api-version=2026-09-01-preview")
-OFFERINGS = {"regions": [{"regionName": "centralus", "skus": [{"name": "basic"}, {"name": "serverless"}]},
-                         {"regionName": "westeurope", "skus": [{"name": "basic"}]}]}
+OFFERINGS = {"regions": [{"regionName": "centralus", "skus": [{"sku": {"name": "basic"}, "limits": {"indexes": 15}},
+                                                             {"sku": {"name": "serverless"}, "limits": {}}]},
+                         {"regionName": "westeurope", "skus": [{"sku": {"name": "basic"}, "limits": {"indexes": 15}}]}]}
 
 
 def search_service(principal=None, state="Succeeded", status="running"):
@@ -1661,6 +1662,13 @@ class SearchTests(unittest.TestCase):
         self.assertEqual(deploy.check_search_tier(ctx, "sub", {"location": "centralus", "search_location": "westeurope",
                                                                "search_sku": "basic"}),
                          "Search basic offered in westeurope")
+
+    def test_offerings_that_name_no_sku_are_unverified_rather_than_a_stop(self):
+        unnamed = {"regions": [{"regionName": "centralus", "skus": [{"name": "basic"}, {"limits": {}}]}]}
+        ctx = self.search_context(FakeHttp(), [(az_rest("fetchOfferings"), deploy.Result(0, json.dumps(unnamed)))])
+        self.assertEqual(deploy.check_search_tier(ctx, "sub", {"location": "centralus", "search_location": None,
+                                                               "search_sku": "basic"}),
+                         "Search basic in centralus unverified")
 
     def test_the_serverless_feature_is_registered_as_you_once_per_subscription(self):
         feature = {"state": "NotRegistered"}
