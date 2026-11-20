@@ -1,7 +1,7 @@
 # Order and shipment data definitions (DATA-DEF-002)
 
-Document ID: DATA-DEF-002 · Version 1.3 · Status: Approved · Effective 1 October 2026 · Next review 1 April 2027
-Owner: Data Governance Office · Audience: all staff who use order data · Classification: Internal
+Document ID: DATA-DEF-002 | Version 1.3 | Status: Approved | Effective 1 October 2026 | Next review 1 April 2027
+Owner: Data Governance Office | Audience: all staff who use order data | Classification: Internal
 Fictional sample document for a demonstration. It is not operational guidance.
 
 ## 1. Purpose (DATA-DEF-002)

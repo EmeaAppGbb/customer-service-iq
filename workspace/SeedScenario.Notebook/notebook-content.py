@@ -116,8 +116,8 @@ tables = (
 documents = {
     "CS-POL-014-delayed-order-handling-policy.md": """# Delayed order handling policy (CS-POL-014)
 
-Document ID: CS-POL-014 · Version 3.2 · Status: Approved · Effective 1 September 2026 · Next review 1 March 2027
-Owner: Head of Customer Service · Audience: all customer-service staff · Classification: Internal
+Document ID: CS-POL-014 | Version 3.2 | Status: Approved | Effective 1 September 2026 | Next review 1 March 2027
+Owner: Head of Customer Service | Audience: all customer-service staff | Classification: Internal
 Fictional sample document for a demonstration. It is not operational guidance.
 
 ## 1. Purpose and scope (CS-POL-014)
@@ -173,8 +173,8 @@ approval.
 """,
     "CS-GDL-007-customer-communication-delays.md": """# Customer communication guideline: delayed orders (CS-GDL-007)
 
-Document ID: CS-GDL-007 · Version 2.1 · Status: Approved · Effective 15 June 2026 · Next review 15 December 2026
-Owner: Customer Experience lead · Audience: all customer-service staff · Classification: Internal
+Document ID: CS-GDL-007 | Version 2.1 | Status: Approved | Effective 15 June 2026 | Next review 15 December 2026
+Owner: Customer Experience lead | Audience: all customer-service staff | Classification: Internal
 Fictional sample document for a demonstration. It is not operational guidance.
 
 ## 1. Purpose (CS-GDL-007)
@@ -216,8 +216,8 @@ manager when they have asked to be copied. A person always sends the reply; an A
 """,
     "LOG-KB-031-customs-holds.md": """# Customs holds: internal handling note (LOG-KB-031)
 
-Document ID: LOG-KB-031 · Version 1.4 · Status: Approved · Effective 3 August 2026 · Next review 3 February 2027
-Owner: Logistics Operations lead · Audience: logistics and customer-service staff · Classification: Internal
+Document ID: LOG-KB-031 | Version 1.4 | Status: Approved | Effective 3 August 2026 | Next review 3 February 2027
+Owner: Logistics Operations lead | Audience: logistics and customer-service staff | Classification: Internal
 Fictional sample document for a demonstration. It is not operational guidance.
 
 ## 1. What a customs hold is (LOG-KB-031)
@@ -248,8 +248,8 @@ Describe a customs hold to a customer as a routine customs check, as the Custome
 """,
     "DATA-DEF-002-order-shipment-data-definitions.md": """# Order and shipment data definitions (DATA-DEF-002)
 
-Document ID: DATA-DEF-002 · Version 1.3 · Status: Approved · Effective 1 October 2026 · Next review 1 April 2027
-Owner: Data Governance Office · Audience: all staff who use order data · Classification: Internal
+Document ID: DATA-DEF-002 | Version 1.3 | Status: Approved | Effective 1 October 2026 | Next review 1 April 2027
+Owner: Data Governance Office | Audience: all staff who use order data | Classification: Internal
 Fictional sample document for a demonstration. It is not operational guidance.
 
 ## 1. Purpose (DATA-DEF-002)

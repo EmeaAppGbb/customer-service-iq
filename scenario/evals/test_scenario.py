@@ -229,12 +229,18 @@ class KnowledgeTests(unittest.TestCase):
             version = re.search(r"Version (\d+\.\d+)", header)[1]
             effective = re.search(r"Effective (\d{1,2} \w+ \d{4})", header)[1]
             self.assertRegex(header, r"Status: Approved .* Next review \d{1,2} \w+ \d{4}$")
-            self.assertRegex(text.splitlines()[3], r"^Owner: .+ · Audience: .+ · Classification: Internal$")
+            self.assertRegex(text.splitlines()[3], r"^Owner: .+ \| Audience: .+ \| Classification: Internal$")
             self.assertIn("Fictional sample document", text)
             headings = re.findall(r"(?m)^## .*$", text)
             self.assertTrue(headings and all(heading.endswith(f"({document_id})") for heading in headings), name)
             self.assertRegex(readme, rf"\| \[`{re.escape(name)}`\]\({re.escape(name)}\) \| {document_id} \| {version} \| "
                                      rf"{effective} \|")
+
+    def test_documents_are_ascii(self):
+        # Search's OneLake indexer guesses the encoding of a file without a byte-order mark: it read the UTF-8
+        # middle dots these headers once used as GBK and indexed Chinese characters.
+        for name, text in documents().items():
+            self.assertTrue(text.isascii(), f"{name} must stay ASCII so Search indexes it as written")
 
     def test_no_document_holds_golden_answers_or_mail(self):
         for name, text in documents().items():

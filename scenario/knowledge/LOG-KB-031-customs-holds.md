@@ -1,7 +1,7 @@
 # Customs holds: internal handling note (LOG-KB-031)
 
-Document ID: LOG-KB-031 · Version 1.4 · Status: Approved · Effective 3 August 2026 · Next review 3 February 2027
-Owner: Logistics Operations lead · Audience: logistics and customer-service staff · Classification: Internal
+Document ID: LOG-KB-031 | Version 1.4 | Status: Approved | Effective 3 August 2026 | Next review 3 February 2027
+Owner: Logistics Operations lead | Audience: logistics and customer-service staff | Classification: Internal
 Fictional sample document for a demonstration. It is not operational guidance.
 
 ## 1. What a customs hold is (LOG-KB-031)

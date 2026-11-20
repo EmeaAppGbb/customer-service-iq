@@ -93,6 +93,8 @@ class Run {
   streamError?: { message: string; code?: string }
   deltas: string[] = []
   done = false
+  // Message items a reasoning model marks as commentary, such as a preamble before a tool call: never the answer.
+  private readonly commentary = new Set<string>()
   private readonly clock: () => number
   private readonly onTool: (call: ToolCall) => void
 
@@ -110,6 +112,7 @@ class Run {
         return
       case 'response.output_item.added':
         if (item?.type === 'mcp_call') this.start(item)
+        else if (item?.type === 'message' && item.phase === 'commentary' && typeof item.id === 'string') this.commentary.add(item.id)
         return
       case 'response.output_item.done':
         if (item?.type === 'mcp_call') this.finish(item)
@@ -119,7 +122,9 @@ class Run {
         }
         return
       case 'response.output_text.delta':
-        if (typeof data.delta === 'string') this.deltas.push(data.delta)
+        if (typeof data.delta === 'string' && !(typeof data.item_id === 'string' && this.commentary.has(data.item_id))) {
+          this.deltas.push(data.delta)
+        }
         return
       case 'response.completed':
       case 'response.incomplete':
@@ -214,11 +219,13 @@ class Run {
   }
 }
 
-// The assistant's message text, in output order.
+// The assistant's answer text, in output order, without the commentary a reasoning model can add, such as a
+// preamble before a tool call.
 export function answerText(response: Json): string {
   const parts: string[] = []
   for (const item of Array.isArray(response.output) ? response.output : []) {
     if (!record(item) || item.type !== 'message' || (item.role !== undefined && item.role !== 'assistant')) continue
+    if (item.phase === 'commentary') continue
     for (const content of Array.isArray(item.content) ? item.content : []) {
       if (record(content) && content.type === 'output_text' && typeof content.text === 'string') parts.push(content.text)
     }

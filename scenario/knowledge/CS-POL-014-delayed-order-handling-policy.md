@@ -1,7 +1,7 @@
 # Delayed order handling policy (CS-POL-014)
 
-Document ID: CS-POL-014 · Version 3.2 · Status: Approved · Effective 1 September 2026 · Next review 1 March 2027
-Owner: Head of Customer Service · Audience: all customer-service staff · Classification: Internal
+Document ID: CS-POL-014 | Version 3.2 | Status: Approved | Effective 1 September 2026 | Next review 1 March 2027
+Owner: Head of Customer Service | Audience: all customer-service staff | Classification: Internal
 Fictional sample document for a demonstration. It is not operational guidance.
 
 ## 1. Purpose and scope (CS-POL-014)

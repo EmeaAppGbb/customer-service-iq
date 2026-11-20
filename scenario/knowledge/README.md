@@ -28,6 +28,8 @@ as `Files/archive`; then the reviewed `SeedScenario` publishes the new bytes.
 | Public web context | General background only, labelled "Public context, not company guidance". Never overrides a document or the live data | Web IQ, as the Foundry project, with public terms only |
 
 Every document has an ID, a version, an owner, an effective date and a review date, and every section heading
-repeats the document ID, so a retrieved passage can always be attributed. Keep golden answers, evaluation cases
-and mail out of this folder: they live in [`scenario/evals/`](../evals/) and
-[`scenario/data/work-context-mail.md`](../data/work-context-mail.md), and are never indexed.
+repeats the document ID, so a retrieved passage can always be attributed. Keep the documents ASCII: Search's
+OneLake indexer guesses the encoding of a file without a byte-order mark, and once indexed UTF-8 middle dots as
+Chinese characters. Keep golden answers, evaluation cases and mail out of this folder: they live in
+[`scenario/evals/`](../evals/) and [`scenario/data/work-context-mail.md`](../data/work-context-mail.md), and are
+never indexed.

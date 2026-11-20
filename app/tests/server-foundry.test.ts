@@ -74,6 +74,22 @@ test('the agent runs by name on the project Responses endpoint as the user, stre
   assert.deepEqual(outcome, { status: 'answered', text: '**Pump B is in maintenance, at North Works.** [D1]', responseId: 'resp_1', toolCalls: [done] })
 })
 
+test("a reasoning model's commentary, such as a preamble before a tool call, stays out of the answer", async () => {
+  const message = (id: string, phase: string, text: string) => ({ type: 'message', id, role: 'assistant', phase, content: [{ type: 'output_text', text }] })
+  const output = [message('msg_c', 'commentary', 'Checking the live data first.'), { ...ontology, output: '...' }, message('msg_f', 'final_answer', '**The answer.** [D1]')]
+  const final = await askAgent(run(fetcher(sse({ type: 'response.completed', response: { id: 'resp_1', status: 'completed', output } }))))
+  assert.equal(final.status === 'answered' && final.text, '**The answer.** [D1]')
+  // When the completed response holds no message text, the streamed text is the fallback, still without commentary.
+  const streamed = await askAgent(run(fetcher(sse(
+    { type: 'response.output_item.added', item: { type: 'message', id: 'msg_c', phase: 'commentary' } },
+    { type: 'response.output_text.delta', item_id: 'msg_c', delta: 'Checking the live data first.' },
+    { type: 'response.output_item.added', item: { type: 'message', id: 'msg_f', phase: 'final_answer' } },
+    { type: 'response.output_text.delta', item_id: 'msg_f', delta: '**The answer.**' },
+    { type: 'response.completed', response: { id: 'resp_1', status: 'completed', output: [] } },
+  ))))
+  assert.equal(streamed.status === 'answered' && streamed.text, '**The answer.**')
+})
+
 test('a follow-up continues the previous response', async () => {
   const captured: Captured = {}
   const outcome = await askAgent(run(fetcher(sse(completed('It has been since Monday [D1].', 'resp_2')), captured), {

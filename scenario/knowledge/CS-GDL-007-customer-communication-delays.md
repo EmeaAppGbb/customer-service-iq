@@ -1,7 +1,7 @@
 # Customer communication guideline: delayed orders (CS-GDL-007)
 
-Document ID: CS-GDL-007 · Version 2.1 · Status: Approved · Effective 15 June 2026 · Next review 15 December 2026
-Owner: Customer Experience lead · Audience: all customer-service staff · Classification: Internal
+Document ID: CS-GDL-007 | Version 2.1 | Status: Approved | Effective 15 June 2026 | Next review 15 December 2026
+Owner: Customer Experience lead | Audience: all customer-service staff | Classification: Internal
 Fictional sample document for a demonstration. It is not operational guidance.
 
 ## 1. Purpose (CS-GDL-007)
