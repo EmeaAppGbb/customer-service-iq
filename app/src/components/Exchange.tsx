@@ -1,11 +1,12 @@
 import { useEffect, useId, useState, type FormEvent } from 'react'
 import { followUpFrom, type Exchange, type Thread, type Turn } from '../exchanges.ts'
-import { VARIANT_DETAILS, VARIANT_LABELS, announcement, duration, iqName } from '../labels.ts'
+import { VARIANT_LABELS, announcement, duration, iqName } from '../labels.ts'
 import { QUESTION_LIMIT } from '../live/protocol.ts'
 import { UNAUTHORIZED } from '../live/stream.ts'
 import { CANCELLED } from '../live/turn.ts'
 import type { TurnResult } from '../live/types.ts'
 import { Reply } from './Reply.tsx'
+import { SourceFlow } from './SourceFlow.tsx'
 import { ToolTimeline } from './ToolTimeline.tsx'
 
 export interface TurnActions {
@@ -72,22 +73,27 @@ function Outcome({ result, turnId, onRetry, onSignIn }: { result: TurnResult; tu
   }
 }
 
-function TurnView({ thread, turn, first, actions }: { thread: Thread; turn: Turn; first: boolean; actions: TurnActions }) {
+function TurnView({ thread, turn, first, latest, actions }: { thread: Thread; turn: Turn; first: boolean; latest: boolean; actions: TurnActions }) {
   const result = turn.running ? undefined : turn.result
+  const failed = turn.toolCalls.filter((call) => call.state === 'failed').length
   return (
-    <div className="turn" aria-busy={turn.running}>
+    <div className="turn">
       {!first && <p className="follow-up-question"><span>Follow-up</span> {turn.question}</p>}
-      {turn.toolCalls.length > 0 && <ToolTimeline calls={turn.toolCalls} />}
-      {turn.running && <Running turn={turn} onStop={() => actions.onStop(turn)} />}
-      {result && (
-        <>
-          <Outcome result={result} turnId={turn.id} onRetry={() => actions.onRetry(thread, turn)} onSignIn={actions.onSignIn} />
-          <p className="meta">
-            {result.responseId && <span>Response <code>{result.responseId}</code></span>}
-            <span>{duration(result.elapsedMs)}</span>
-          </p>
-        </>
-      )}
+      <div className="turn-layout">
+        <div className="turn-copy" aria-busy={turn.running}>
+          {turn.running && <Running turn={turn} onStop={() => actions.onStop(turn)} />}
+          {result && <Outcome result={result} turnId={turn.id} onRetry={() => actions.onRetry(thread, turn)} onSignIn={actions.onSignIn} />}
+          {(turn.toolCalls.length > 0 || result) && <details className="disclosure activity">
+            <summary>Run details{failed > 0 && <span className="failure-count"> · {failed} failed</span>}</summary>
+            {turn.toolCalls.length > 0 && <ToolTimeline calls={turn.toolCalls} />}
+            {result && <p className="meta">
+              <span>{duration(result.elapsedMs)}</span>
+              {result.responseId && <span>Response <code>{result.responseId}</code></span>}
+            </p>}
+          </details>}
+        </div>
+        {latest && thread.variant === 'with_iq' && <SourceFlow turn={turn} />}
+      </div>
       <p className="visually-hidden" role="status">{announcement(turn, VARIANT_LABELS[thread.variant])}</p>
     </div>
   )
@@ -126,11 +132,10 @@ function ThreadCard({ thread, actions }: { thread: Thread; actions: TurnActions 
   return (
     <section className={`thread thread-${thread.variant}`} aria-labelledby={id}>
       <header className="thread-head">
-        <h3 id={id}>{VARIANT_LABELS[thread.variant]}</h3>
-        <span className="thread-detail">{VARIANT_DETAILS[thread.variant]}</span>
+        <h2 id={id}>{VARIANT_LABELS[thread.variant]}</h2>
         <span className={`state state-${status}`}>{STATUS_LABELS[status]}</span>
       </header>
-      {thread.turns.map((turn, index) => <TurnView key={turn.id} thread={thread} turn={turn} first={index === 0} actions={actions} />)}
+      {thread.turns.map((turn, index) => <TurnView key={turn.id} thread={thread} turn={turn} first={index === 0} latest={turn === last} actions={actions} />)}
       {followUpFrom(thread) && <FollowUp thread={thread} onFollowUp={actions.onFollowUp} />}
     </section>
   )
@@ -140,7 +145,7 @@ export function ExchangeView({ exchange, actions }: { exchange: Exchange; action
   const id = useId()
   return (
     <article className="exchange" aria-labelledby={id}>
-      <h2 id={id} className="question">{exchange.question}</h2>
+      <h1 id={id} className="question" tabIndex={-1} data-long={exchange.question.length > 105}>{exchange.question}</h1>
       <div className={exchange.threads.length > 1 ? 'threads compare' : 'threads'}>
         {exchange.threads.map((thread) => <ThreadCard key={thread.id} thread={thread} actions={actions} />)}
       </div>

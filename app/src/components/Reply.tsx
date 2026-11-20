@@ -10,6 +10,9 @@ const sourceElement = (turnId: string, marker: string) => `${turnId}-source-${ma
 export function Reply({ reply, turnId }: { reply: ParsedReply; turnId: string }) {
   const sources = useRef<HTMLDetailsElement>(null)
   const answer = useMemo(() => renderMarkdown(reply.answer), [reply.answer])
+  // Only fold after an actual bold lead paragraph; never cut a sentence, a list, or a run of citation chips.
+  const leadEnd = answer.startsWith('<p><strong>') ? answer.indexOf('</p>') + 4 : answer.length
+  const hasMore = leadEnd > 3 && leadEnd < answer.length
   const steps = useMemo(() => reply.steps.map((step) => renderInline(step)), [reply.steps])
   const first = new Map<string, number>()
   reply.sources.forEach((source, index) => {
@@ -23,9 +26,12 @@ export function Reply({ reply, turnId }: { reply: ParsedReply; turnId: string })
   }
   return (
     <div className="reply" onClick={showSource}>
-      <div className="answer" dangerouslySetInnerHTML={{ __html: answer }} />
+      <div className="answer answer-lead" dangerouslySetInnerHTML={{ __html: hasMore ? answer.slice(0, leadEnd) : answer }} />
+      {hasMore && <details className="disclosure full-answer"><summary>Full answer</summary>
+        <div className="answer" dangerouslySetInnerHTML={{ __html: answer.slice(leadEnd) }} />
+      </details>}
       {reply.sources.length > 0 && (
-        <details className="sources" ref={sources}>
+        <details className="disclosure sources" ref={sources}>
           <summary>Sources <span className="count">{reply.sources.length}</span></summary>
           <ol>
             {reply.sources.map((source, index) => (
@@ -44,7 +50,7 @@ export function Reply({ reply, turnId }: { reply: ParsedReply; turnId: string })
         </details>
       )}
       {steps.length > 0 && (
-        <details className="steps">
+        <details className="disclosure steps">
           <summary>Steps <span className="count">{steps.length}</span></summary>
           <ol>
             {steps.map((html, index) => <li key={index} dangerouslySetInnerHTML={{ __html: html }} />)}

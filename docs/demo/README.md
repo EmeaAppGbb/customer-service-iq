@@ -100,18 +100,20 @@ says what a correct answer contains. Select **Ask both** unless the step says ot
 
 ### The analyst
 
-**1. The end-to-end question** (`CS-E2E-01`). Select the first sample:
+**1. The end-to-end question** (`CS-E2E-01`). Select **Draft a customer reply** (or the first question under
+**View all 8**):
 
 > Order SO-48213 is late. Why, and when will it arrive? What may we offer under our policy? Add public context on
 > customs holds, then draft a reply to the customer.
 
-- The **tool timeline** shows four calls, one per IQ, with their arguments: point at the Web IQ query, which holds
+- **Source flow** shows which tools are reading and which source types the answer cites. Open **Run details** for
+  the tool timeline and expand **Query** to see a call's arguments: point at the Web IQ query, which holds
   no customer, order or carrier.
 - Each fact carries a **chip** in its IQ's color: `D` live data, `F` an approved document and section, `W` a mail
   message, `Web` public context. *Sources* and *Steps* show where each came from and what each tool was asked.
 - **Authority:** the live data is current; documents set policy; mail is what colleagues reported; public context
   is labelled and never overrides the others.
-- The **recommendation** is a proposal: expedited delivery the analyst may offer, a credit only after a team
+- Open **Full answer** if the lead is folded. The **recommendation** is a proposal: expedited delivery the analyst may offer, a credit only after a team
   lead's approval. The **draft** carries no internal details: no broker, no tariff code, no credit.
 - **Without IQ**, the same agent says it can't confirm any of it and invents nothing.
 
