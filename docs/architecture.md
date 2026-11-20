@@ -58,7 +58,9 @@ format, in three parts:
 
 1. **The answer**: the direct answer first, in bold, with a source marker right
    after each fact.
-2. **Sources**: a line "Sources", then one line per marker.
+2. **Sources**: a line "Sources", then one line per marker. Each source has its own
+   number: two documents are `[F1]` and `[F2]`, and a document's sections share its
+   number.
 3. **Steps**: a line "Steps", then a numbered list of the tools called, what each
    was asked and what it found, or that no tool was called.
 
