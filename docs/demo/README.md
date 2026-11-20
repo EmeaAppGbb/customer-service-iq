@@ -138,8 +138,8 @@ Then select the last sample (`CS-EXTERNAL-14`), which sets internal guidance bes
 > context on common causes and typical clearance times.
 
 - **Foundry IQ** cites each document with its own marker, such as `[F1]` for the customs-hold note and `[F2]` for
-  the communication guideline. Its timeline of one to two business days is internal guidance, never a promise to
-  the customer.
+  the communication guideline: the customer hears of a routine customs check, never of tariff codes or the broker.
+  Any internal timeline it gives is guidance, never a promise to the customer.
 - **Web IQ** adds one line that begins *Public context, not company guidance*, with the page's title, site and URL.
   Discuss the source's credibility and currency, and that it never overrides an approved document.
 - **Permitted use:** put *Fabrikam Retail's shipment is held in customs at the Eastport import hub.* in front of the

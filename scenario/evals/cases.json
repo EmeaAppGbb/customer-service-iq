@@ -232,12 +232,12 @@
       "with_iq": {
         "tools": ["foundry_iq_knowledge", "web_iq_public_context"],
         "tools_never": ["fabric_iq_ontology", "work_iq_mail"],
-        "facts": ["routine customs check", "business days"],
+        "facts": ["routine customs check", "logistics", "tariff", "broker"],
         "phrases": ["Public context, not company guidance"],
         "markers": ["F", "Web"],
         "sources": ["LOG-KB-031"],
         "tool_arguments_must_not": {"web_iq_public_context": "private_terms"},
-        "review": "Each document has its own marker; the internal timeline is guidance, never a promise to the customer; one labelled public-context line with the page's title, site and URL, which never overrides the documents."
+        "review": "Each document has its own marker; the customer hears of a routine customs check, never of tariff codes or the broker; any internal timeline stays guidance, never a promise; one labelled public-context line with the page's title, site and URL, which never overrides the documents."
       },
       "without_iq": {"tools": [], "phrases": ["can't confirm"], "markers": [], "answer_must_not": ["routine customs check"]}
     }
