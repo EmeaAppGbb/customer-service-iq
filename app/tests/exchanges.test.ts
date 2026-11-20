@@ -3,6 +3,7 @@ import test from 'node:test'
 import { followUpFrom, newTurn, reduce, type Exchange } from '../src/exchanges.ts'
 import type { ToolCall, TurnResult } from '../src/live/types.ts'
 import { parseReply } from '../src/live/reply.ts'
+import { sourceFlow } from '../src/sourceFlow.ts'
 
 const running: ToolCall = { id: 'mcp_1', server: 'fabric_iq_ontology', tool: 'ask_ontology', state: 'running' }
 const done: ToolCall = { ...running, state: 'completed', ms: 2100 }
@@ -51,4 +52,27 @@ test('asking again restarts the same turn with its question and previous respons
   state = reduce(state, { type: 'restart', turnId: 't3', startedAt: 9 })
   assert.deepEqual(state[0].threads[0].turns[1], { id: 't3', question: 'Since when?', startedAt: 9, running: true, toolCalls: [], previousResponseId: 'resp_1' })
   assert.equal(reduce(state, { type: 'ask', exchange: { id: 'e2', question: 'q', threads: [] } })[0].id, 'e2', 'the newest question comes first')
+})
+
+test('the flow distinguishes tool activity from evidence actually cited in this turn', () => {
+  const turn = newTurn('t', 'q', 0)
+  const states = (t: typeof turn) => Object.fromEntries(sourceFlow(t).map(({ iq, state }) => [iq, state]))
+  const mail: ToolCall = { ...done, id: 'mcp_2', server: 'work_iq_mail' }
+  turn.toolCalls = [running, mail, { ...running, id: 'mcp_3', server: 'unknown' }]
+  assert.deepEqual(states(turn), { fabric: 'reading', foundry: 'idle', web: 'idle', work: 'consulted' })
+  turn.running = false
+  turn.toolCalls = [done, mail]
+  turn.result = { status: 'answered', raw: 'Mail [W1]', reply: parseReply('Mail [W1]'), elapsedMs: 2000, toolCalls: turn.toolCalls }
+  assert.deepEqual(states(turn), { fabric: 'consulted', foundry: 'idle', web: 'idle', work: 'cited' })
+})
+
+test('a consent request, stopped call, or new turn never inherits a cited ribbon', () => {
+  const turn = newTurn('t', 'q', 0)
+  turn.running = false
+  turn.result = { status: 'needs-consent', consentUrl: 'https://example.com/consent', server: 'work_iq_mail', elapsedMs: 200, toolCalls: [] }
+  assert.deepEqual(sourceFlow(turn).filter((s) => s.state !== 'idle'), [{ iq: 'work', state: 'consent' }])
+  turn.toolCalls = [{ ...running, state: 'failed' }]
+  turn.result = { status: 'failed', code: 'cancelled', message: 'Stopped', elapsedMs: 1000, toolCalls: turn.toolCalls }
+  assert.deepEqual(sourceFlow(turn).filter((s) => s.state !== 'idle'), [{ iq: 'fabric', state: 'failed' }])
+  assert.ok(sourceFlow(newTurn('next', 'q', 1000)).every((s) => s.state === 'idle'))
 })

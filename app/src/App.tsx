@@ -1,7 +1,10 @@
 import { useCallback, useEffect, useMemo, useReducer, useRef, useState } from 'react'
 import { Composer } from './components/Composer.tsx'
+import { Dialog } from './components/Dialog.tsx'
 import { ExchangeView, type TurnActions } from './components/Exchange.tsx'
 import { Header } from './components/Header.tsx'
+import { Icon } from './components/Icon.tsx'
+import { FlowMotion } from './components/SourceFlow.tsx'
 import { followUpFrom, newTurn, reduce, type Exchange, type Thread, type Turn } from './exchanges.ts'
 import type { Choice } from './labels.ts'
 import { createAgentClient, loadSession } from './live/client.ts'
@@ -20,6 +23,12 @@ export default function App() {
   const [sessionState, setSessionState] = useState<SessionState>({ status: 'loading' })
   const [problem, setProblem] = useState<string>()
   const [exchanges, dispatch] = useReducer(reduce, [])
+  const [selected, setSelected] = useState<string>()
+  const [historyOpen, setHistoryOpen] = useState(false)
+  const [choice, setChoice] = useState<Choice>('with_iq')
+  const main = useRef<HTMLElement>(null)
+  const previousSelection = useRef(selected)
+  const current = exchanges.find((exchange) => exchange.id === selected)
   const client = useMemo(() => createAgentClient(), [])
   // The running turns' controllers, by turn: Stop aborts one, and the server then stops its Foundry run.
   const controllers = useRef(new Map<string, AbortController>())
@@ -46,6 +55,13 @@ export default function App() {
     }
   }, [])
 
+  useEffect(() => {
+    if (selected === previousSelection.current) return
+    previousSelection.current = selected
+    main.current?.querySelector<HTMLElement>('h1')?.focus({ preventScroll: true })
+    window.scrollTo(0, 0)
+  }, [selected])
+
   const session = sessionState.status === 'ready' ? sessionState.session : undefined
   const blocked = sessionState.status === 'loading' ? 'Connecting to the app server…'
     : sessionState.status === 'failed' ? 'The app can’t ask the agents until sign-in starts.'
@@ -69,6 +85,7 @@ export default function App() {
       threads: variants.map((variant) => ({ id: crypto.randomUUID(), variant, turns: [newTurn(crypto.randomUUID(), text, startedAt)] })),
     }
     dispatch({ type: 'ask', exchange })
+    setSelected(exchange.id)
     for (const thread of exchange.threads) run(thread.turns[0].id, { variant: thread.variant, text })
   }, [run])
 
@@ -93,10 +110,11 @@ export default function App() {
   }), [run, authenticate])
 
   return (
-    <>
+    <FlowMotion>
       <a className="skip-link" href="#main">Skip to the question</a>
-      <Header session={session} onSignIn={() => authenticate('signIn')} onSignOut={() => authenticate('signOut')} />
-      <main id="main" className="page">
+      <Header session={session} onHistory={exchanges.length ? () => setHistoryOpen(true) : undefined}
+        onSignIn={() => authenticate('signIn')} onSignOut={() => authenticate('signOut')} />
+      <main id="main" className="page" ref={main}>
         {sessionState.status === 'failed' && (
           <div className="notice error page-notice" role="alert">
             <p>{sessionState.message}</p>
@@ -106,14 +124,23 @@ export default function App() {
           </div>
         )}
         {problem && <div className="notice error page-notice" role="alert"><p>{problem}</p></div>}
-        <Composer blocked={blocked} onAsk={ask} />
-        <section className="exchanges" aria-label="Answers">
-          {exchanges.map((exchange) => <ExchangeView key={exchange.id} exchange={exchange} actions={actions} />)}
-        </section>
+        {current ? <>
+          <button type="button" className="text-button new-question" onClick={() => setSelected(undefined)}><Icon name="back" size={16} />New question</button>
+          <ExchangeView key={current.id} exchange={current} actions={actions} />
+        </> : <Composer blocked={blocked} choice={choice} onChoice={setChoice} onAsk={ask} />}
       </main>
       <footer className="footer">
-        <p>Everything in this sample is fictional. Each question runs a Foundry agent as you.</p>
+        <span>Fictional order scenario</span>
+        <span>{session?.mode === 'mock' ? 'Sample answers · No sign-in' : 'Microsoft Foundry'}</span>
       </footer>
-    </>
+      {historyOpen && <Dialog title="Question history" onDismiss={() => setHistoryOpen(false)}>
+        <p className="sheet-note">Questions from this tab, newest first.</p>
+        <ol className="sample-list">{exchanges.map((exchange) => <li key={exchange.id}>
+          <button type="button" onClick={() => { setSelected(exchange.id); setHistoryOpen(false) }}>
+            <span>{exchange.question}</span><Icon name="next" size={16} />
+          </button>
+        </li>)}</ol>
+      </Dialog>}
+    </FlowMotion>
   )
 }

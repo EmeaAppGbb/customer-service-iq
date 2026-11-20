@@ -29,6 +29,21 @@ From `app/`:
 | `npm start` | The built server on port 8080 |
 | `npm run lint`, `npm test` | ESLint; the unit tests |
 
+## Try the interface locally
+
+From `app/`, run `npm ci` and `npm run dev:mock`, then open `http://localhost:3000/`. **Ask question** runs the
+editable starter question. **Draft a customer reply** exercises all four source types; **View all 8** opens the
+full sample list. These are sample answers, not live lookups.
+
+The opening ribbon map is an overview, not a connection check. During a turn it highlights the tools that report
+activity; the answer distinguishes sources it cites from tools that were only consulted. Expand **Source flow**
+for the labelled states. The renderer is local WebGL, pauses offscreen, honors reduced motion, and falls back to
+a labelled static map without a GPU. It makes no data requests of its own.
+
+Select an inline citation to jump to its source. **Full answer** reveals supporting text when the agent supplied a
+bold lead paragraph; **Run details** holds the tool timeline, queries, timing and response ID. **New question** and
+**Question history** switch between investigations in this tab without cancelling running turns.
+
 ## Run it against a deployment
 
 Write the app settings to the ignored `app/.env.local`, from the repository root:
