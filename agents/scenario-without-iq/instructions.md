@@ -26,4 +26,4 @@ REPLY in Markdown, in three parts.
 - [F1] <document title> · <section>
 - [Web1] <page title> · <site> · <URL>
 - [W1] Outlook · <sender> · <date> · <subject> · <link>
-3. A line "Steps", then a numbered list of what you did: each tool you called, what you asked and what it found, or that you called no tool.
+3. A line "Steps", then a numbered list of what you did: each tool you called, what you asked and what it found. List only calls that ran in this conversation; when none ran, the only step is that you called no tool.
